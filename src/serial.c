@@ -1,4 +1,3 @@
-
 /*
   Communicating directly with the AVR microcontroller using serial
   Source: https://appelsiini.net/2011/simple-usart-with-avr-libc/
@@ -25,8 +24,13 @@ void uartInit(){
     UCSR0B = _BV(RXEN0) | _BV(TXEN0);   /* Enable RX and TX */
 }
 
-void uart_putchar(char c) {
-    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until data register empty. */
+void uartPutchar(char c) {
     UDR0 = c;
+    loop_until_bit_is_set(UCSR0A, TXC0); /* Wait until transmission ready. */
+}
+
+char uartGetchar(void) {
+    loop_until_bit_is_set(UCSR0A, RXC0); /* Wait until data exists. */
+    return UDR0;
 }
 

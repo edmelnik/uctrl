@@ -1,8 +1,15 @@
 #!/bin/bash
 # Compile and upload a C program to the ATMega328 microcontroller
 
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/main.c -o obj/main.o
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/TWI_Master.c -o obj/TWI_Master.o
-avr-gcc -mmcu=atmega328p obj/main.o obj/TWI_Master.o -o bin/main
-avr-objcopy -O ihex -R .eeprom bin/main bin/main.hex
-avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/main.hex
+# Compile and flash main and co
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/main.c -o obj/main.o
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/TWI_Master.c -o obj/TWI_Master.o
+# avr-gcc -mmcu=atmega328p obj/main.o obj/TWI_Master.o -o bin/main
+# avr-objcopy -O ihex -R .eeprom bin/main bin/main.hex
+# avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/main.hex
+
+# Compile and flash serial.c 
+avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
+avr-gcc -mmcu=atmega328p obj/serial.o -o bin/serial
+avr-objcopy -O ihex -R .eeprom bin/serial bin/serial.hex
+avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/serial.hex
