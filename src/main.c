@@ -165,22 +165,22 @@ int main(void){
 		    }
 		    else if (TWI_operation == READ_DATA_FROM_BUFFER)
 		    { // Get the received data from the transceiver buffer
-			TWI_Get_Data_From_Transceiver( messageBuf, 2 );
+			TWI_Get_Data_From_Transceiver(messageBuf, 2);
 			PORTB = messageBuf[1];        // Store data on PORTB.
-			TWI_operation = FALSE;        // Set next operation        
+			TWI_operation = FALSE;        // Set next operation
 		    }
 		}
 	    }
-	    else // Got an error during the last transmission
-	    {
-		// Use TWI status information to determine cause of failure and take appropriate actions. 
-		TWI_Act_On_Failure_In_Last_Transmission( TWI_Get_State_Info( ) );
+	    else{ // Got an error during the last transmission
+		// Use TWI status information to determine cause of failure
+		//  and take appropriate actions. 
+		TWI_Act_On_Failure_In_Last_Transmission(TWI_Get_State_Info());
 	    }
 	}
 
-	// Do something else while waiting for TWI operation to complete and/or a switch to be pressed
+	// Do something else while waiting for TWI operation to complete
+	//  and/or a switch to be pressed
 	asm("nop"); // Put own code here.
-
     }
 }
 
