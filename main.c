@@ -77,7 +77,7 @@ unsigned char TWI_Act_On_Failure_In_Last_Transmission ( unsigned char TWIerrorMs
 }
 
 
-int main(void) {
+int main(void){
     unsigned char messageBuf[4];
     unsigned char TWI_targetSlaveAddress, temp, TWI_operation=0,
 	pressedButton, myCounter=0;
@@ -90,7 +90,7 @@ int main(void) {
     DDRD  = 0x00;
 
     TWI_Master_Initialise();
-    sei();//set global interrupt enable
+    sei(); //set global interrupt enable
   
     TWI_targetSlaveAddress   = 0x10;
 
