@@ -33,8 +33,12 @@ void uartInit(){
 void uartPutchar(char c, FILE *stream){
     /* if(c == '\n') */
     /* 	uartPutchar('\r', stream); */
+
+    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until data reg ready. */
     UDR0 = c;
-    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until transmission ready. */
+
+    /* UDR0 = c; */
+    /* loop_until_bit_is_set(UCSR0A, TXC0); Wait until transmission ready. */
 }
 
 char uartGetchar(FILE *stream){
@@ -50,7 +54,7 @@ int main(){
     uartInit();
     stdout = &uart_output;
     stdin = &uart_input;
-    char msg[] = "END\n";
+    char msg[] = "946093318444555094179583640END";
     DDRB |= _BV(DDB5);
     while(1){
 	puts(msg);
