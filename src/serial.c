@@ -31,10 +31,10 @@ void uartInit(){
 }
 
 void uartPutchar(char c, FILE *stream){
-    if(c == '\n')
-	uartPutchar('\r', stream);
+    /* if(c == '\n') */
+    /* 	uartPutchar('\r', stream); */
     UDR0 = c;
-    loop_until_bit_is_set(UCSR0A, UDREO); /* Wait until transmission ready. */
+    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until transmission ready. */
 }
 
 char uartGetchar(FILE *stream){
@@ -50,13 +50,13 @@ int main(){
     uartInit();
     stdout = &uart_output;
     stdin = &uart_input;
-    char msg[] = "1.22";
+    char msg[] = "END\n";
     DDRB |= _BV(DDB5);
     while(1){
 	puts(msg);
 	PORTB |= _BV(PORTB5);
 	_delay_ms(PRINT_DELAY_MS);
 	PORTB |= _BV(PORTB5);
-	printf(msg);
+	/* printf(msg); */
     }
 }
