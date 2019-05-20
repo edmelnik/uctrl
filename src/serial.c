@@ -34,11 +34,11 @@ void uartPutchar(char c, FILE *stream){
     /* if(c == '\n') */
     /* 	uartPutchar('\r', stream); */
 
-    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait until data reg ready. */
+    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait for data reg */
     UDR0 = c;
 
     /* UDR0 = c; */
-    /* loop_until_bit_is_set(UCSR0A, TXC0); Wait until transmission ready. */
+    /* loop_until_bit_is_set(UCSR0A, TXC0); /\* wait for Tx *\/ */
 }
 
 char uartGetchar(FILE *stream){
