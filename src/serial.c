@@ -51,15 +51,16 @@ FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar, _FDEV_SETUP_READ);
 FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar, _FDEV_SETUP_RW);
 
 int main(){
-    uartInit();
-    
+    uartInit();    
     stdout = &uart_output;
     stdin = &uart_input;
-   
-    char msg[] = "4876852724592"; 
+
+    char msg[] = "testmsg";
     DDRB |= _BV(DDB5);
+    
     while(1){
-	puts(msg);	
+	puts(msg);
+	
 	PORTB |= _BV(PORTB5);
 	_delay_ms(PRINT_DELAY_MS);
 	PORTB |= _BV(PORTB5);
