@@ -33,7 +33,7 @@ void uartInit(){
 void uartPutchar(char c, FILE *stream){
     /* if(c == '\n') */
     /* 	uartPutchar('\r', stream); */
-
+    float k = MUX0;
     loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait for data reg */
     UDR0 = c;
 
@@ -52,15 +52,16 @@ FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar, _FDEV_SETUP_RW);
 
 int main(){
     uartInit();
+    
     stdout = &uart_output;
     stdin = &uart_input;
-    char msg[] = "946093318444555094179583640END";
+   
+    char msg[] = "4876852724592"; 
     DDRB |= _BV(DDB5);
     while(1){
-	puts(msg);
+	puts(msg);	
 	PORTB |= _BV(PORTB5);
 	_delay_ms(PRINT_DELAY_MS);
 	PORTB |= _BV(PORTB5);
-	/* printf(msg); */
     }
 }
