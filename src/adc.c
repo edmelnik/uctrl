@@ -1,3 +1,9 @@
+/*
+Read values from the ADC port and output the values to serial
+
+Should ideally use functions in serial.c for output
+*/
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
