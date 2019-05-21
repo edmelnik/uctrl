@@ -1,5 +1,6 @@
 #!/bin/bash
 
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
-avr-gcc -mmcu=atmega328p obj/serial.o -o bin/serial
-avr-objcopy -O ihex -R .eeprom bin/serial bin/serial.hex
+avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/adc.c -o obj/adc.o
+avr-gcc -mmcu=atmega328p obj/serial.o obj/adc.o -o bin/serial-adc
+avr-objcopy -O ihex -R .eeprom bin/serial-adc bin/serial-adc.hex

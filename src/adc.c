@@ -8,8 +8,11 @@ Should ideally use functions in serial.c for output
 #include <stdlib.h>
 #include <string.h>
 
-#include <util/setbaud.h>
-#include <avr/io.h>
+#include "serial.h"
+
+// next two are included in serial
+/* #include <util/setbaud.h> */
+/* #include <avr/io.h> */
 
 void initADC(){
     ADMUX = (1<<REFS0);
@@ -34,5 +37,5 @@ int main(){
     initADC();
     uint16_t adc_read_val;
     adc_read_val = readADC(0);
-    itoa(adc_read_val, msg, 20);
+ /* itoa(adc_read_val, msg, 20); */
 }

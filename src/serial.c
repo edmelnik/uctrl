@@ -6,15 +6,17 @@
   with pressure sensor I2C communications in the future
 */
 
-#define F_CPU 16000000UL
-#define BAUD 9600
+/* #define F_CPU 16000000UL */
+/* #define BAUD 9600 */
 
-#include <util/setbaud.h>
-#include <avr/io.h>
-#include <stdio.h>
-#include <util/delay.h>
+/* #include <util/setbaud.h> */
+/* #include <avr/io.h> */
+/* #include <stdio.h> */
+/* #include <util/delay.h> */
 
-#define PRINT_DELAY_MS 1000
+/* #define PRINT_DELAY_MS 1000 */
+
+#include "serial.h"
 
 void uartInit(){
     UBRR0H = UBRRH_VALUE;
@@ -46,23 +48,25 @@ char uartGetchar(FILE *stream){
     return UDR0;
 }
 
-FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL, _FDEV_SETUP_WRITE);
-FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar, _FDEV_SETUP_READ);
-FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar, _FDEV_SETUP_RW);
+FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL,
+				     _FDEV_SETUP_WRITE);
+FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
+				    _FDEV_SETUP_READ);
+FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar,
+				 _FDEV_SETUP_RW);
 
-int main(){
-    uartInit();    
-    stdout = &uart_output;
-    stdin = &uart_input;
+/* int main(){ */
+/*     uartInit();     */
+/*     stdout = &uart_output; */
+/*     stdin = &uart_input; */
 
-    char msg[] = "testmsg";
-    DDRB |= _BV(DDB5);
+/*     char msg[] = "testmsg"; */
+/*     DDRB |= _BV(DDB5); */
     
-    while(1){
-	puts(msg);
-	
-	PORTB |= _BV(PORTB5);
-	_delay_ms(PRINT_DELAY_MS);
-	PORTB |= _BV(PORTB5);
-    }
-}
+/*     while(1){ */
+/* 	puts(msg);	 */
+/* 	PORTB |= _BV(PORTB5); */
+/* 	_delay_ms(PRINT_DELAY_MS); */
+/* 	PORTB |= _BV(PORTB5); */
+/*     } */
+/* } */
