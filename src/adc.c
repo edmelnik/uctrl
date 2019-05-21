@@ -33,6 +33,7 @@ uint16_t readADC(uint8_t ch){
     return (ADC);
 }
 
+// Setup serial output streams for stdio
 FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL,
 				     _FDEV_SETUP_WRITE);
 FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
