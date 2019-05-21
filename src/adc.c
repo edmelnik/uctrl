@@ -33,9 +33,31 @@ uint16_t readADC(uint8_t ch){
     return (ADC);
 }
 
+FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL,
+				     _FDEV_SETUP_WRITE);
+FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
+				    _FDEV_SETUP_READ);
+FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar,
+				 _FDEV_SETUP_RW);
+
 int main(){
     initADC();
+    uartInit();
+    
     uint16_t adc_read_val;
-    adc_read_val = readADC(0);
- /* itoa(adc_read_val, msg, 20); */
+    char msg[5];
+    char testmsg[] = "testmsg";
+    stdout = &uart_output;
+    stdin = &uart_input;
+    DDRB |= _BV(DDB5);
+    while(1){
+	adc_read_val = readADC(0);
+	itoa(adc_read_val, msg, 20);
+	PORTB |= _BV(PORTB5);
+	puts(msg);
+	/* puts(testmsg); */
+	_delay_ms(PRINT_DELAY_MS);
+	PORTB |= _BV(PORTB5);
+    }
+
 }
