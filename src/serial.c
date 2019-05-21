@@ -6,16 +6,6 @@
   with pressure sensor I2C communications in the future
 */
 
-/* #define F_CPU 16000000UL */
-/* #define BAUD 9600 */
-
-/* #include <util/setbaud.h> */
-/* #include <avr/io.h> */
-/* #include <stdio.h> */
-/* #include <util/delay.h> */
-
-/* #define PRINT_DELAY_MS 1000 */
-
 #include "serial.h"
 
 void uartInit(){

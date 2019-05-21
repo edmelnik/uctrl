@@ -1,12 +1,13 @@
 /*
 Read values from the ADC port and output the values to serial
+source: http://maxembedded.com/2011/06/the-adc-of-the-avr/
 
 Should ideally use functions in serial.c for output
 */
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
+/* #include <string.h> */
 
 #include "serial.h"
 
@@ -41,22 +42,27 @@ FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
 FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar,
 				 _FDEV_SETUP_RW);
 
+char* getStr(int in){
+    char temp;
+    int i=0;
+    
+}
+
 int main(){
     initADC();
     uartInit();
     
-    uint16_t adc_read_val;
-    char msg[5];
-    char testmsg[] = "testmsg";
     stdout = &uart_output;
     stdin = &uart_input;
-    DDRB |= _BV(DDB5);
+    
+    uint16_t adc_read_val;
+    char msg[20];
+    DDRB |= _BV(DDB5);    
     while(1){
 	adc_read_val = readADC(0);
 	itoa(adc_read_val, msg, 20);
 	PORTB |= _BV(PORTB5);
 	puts(msg);
-	/* puts(testmsg); */
 	_delay_ms(PRINT_DELAY_MS);
 	PORTB |= _BV(PORTB5);
     }
