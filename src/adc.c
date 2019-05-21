@@ -42,12 +42,6 @@ FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
 FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar,
 				 _FDEV_SETUP_RW);
 
-char* getStr(int in){
-    char temp;
-    int i=0;
-    
-}
-
 int main(){
     initADC();
     uartInit();

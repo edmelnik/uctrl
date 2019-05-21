@@ -12,7 +12,3 @@
 void uartInit();
 void uartPutchar(char c, FILE *stream);
 char uartGetchar(FILE *stream);
-
-/* FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL, _FDEV_SETUP_WRITE); */
-/* FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar, _FDEV_SETUP_READ); */
-/* FILE uart_io = FDEV_SETUP_STREAM(uartPutchar, uartGetchar, _FDEV_SETUP_RW); */
