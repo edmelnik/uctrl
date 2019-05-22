@@ -54,9 +54,11 @@ int main(){
     DDRB |= _BV(DDB5);    
     while(1){
 	adc_read_val = readADC(0);
-	itoa(adc_read_val, msg, 20);
 	PORTB |= _BV(PORTB5);
-	puts(msg);
+	// For some reason the value is twice actual input voltage
+	// Might be a good idea to consult the datasheets at some point
+	//  to figure out why
+	printf("%d\n", adc_read_val/2); 
 	_delay_ms(PRINT_DELAY_MS);
 	PORTB |= _BV(PORTB5);
     }
