@@ -8,9 +8,23 @@
 # avr-objcopy -O ihex -R .eeprom bin/main bin/main.hex
 # avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/main.hex
 
-# Compile and flash serial.c 
+# Compile and flash adc.c 
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/adc.c -o obj/adc.o
+# avr-gcc -mmcu=atmega328p obj/serial.o obj/adc.o -o bin/serial-adc
+# avr-objcopy -O ihex -R .eeprom bin/serial-adc bin/serial-adc.hex
+# avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/serial-adc.hex
+
+# compile and flash serial_json.c
+# serial.h
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/adc.c -o obj/adc.o
-avr-gcc -mmcu=atmega328p obj/serial.o obj/adc.o -o bin/serial-adc
-avr-objcopy -O ihex -R .eeprom bin/serial-adc bin/serial-adc.hex
-avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/serial-adc.hex
+# frozen
+avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/frozen.c -o obj/frozen.o
+# main file 
+avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial_json.c -o obj/serial_json.o
+# make bin
+avr-gcc -mmcu=atmega328p obj/serial.o obj/serial_json.o -o bin/serial-json
+# link
+avr-objcopy -O ihex -R .eeprom bin/serial-json bin/serial-json.hex
+# flash
+avrdude -F -V -c arduino -p ATMEGA328P -P /dev/ttyACM0 -b 115200 -U flash:w:bin/serial-json.hex
