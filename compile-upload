@@ -18,8 +18,6 @@
 # compile and flash serial_json.c
 # serial.h
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
-# frozen
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/frozen.c -o obj/frozen.o
 # main file 
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial_json.c -o obj/serial_json.o
 # make bin

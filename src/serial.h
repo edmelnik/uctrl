@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <util/delay.h>
 
-#define PRINT_DELAY_MS 1000
+
 
 void uartInit();
 void uartPutchar(char c, FILE *stream);
