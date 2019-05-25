@@ -1,3 +1,5 @@
+#ifndef SERIAL_LIB
+#define SERIAL_LIB
 
 #define F_CPU 16000000UL
 #define BAUD 9600
@@ -5,7 +7,6 @@
 #include <util/setbaud.h>
 #include <avr/io.h>
 #include <stdio.h>
-#include <util/delay.h>
 
 void uartInit(){
 	UBRR0H = UBRRH_VALUE;
@@ -34,3 +35,5 @@ char uartGetchar(FILE *stream){
     loop_until_bit_is_set(UCSR0A, RXC0); /* Wait until data exists. */
     return UDR0;
 }
+
+#endif

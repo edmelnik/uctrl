@@ -1,9 +1,8 @@
+#ifndef ADC_LIB
+#define ADC_LIB
+
 #include <stdint.h>
 #include <stdlib.h>
-
-/* also included in serial: will this fail? */
-
-/* #include <util/setbaud.h> */
 #include <avr/io.h>
 
 void adcInit(){
@@ -12,15 +11,11 @@ void adcInit(){
 }
 uint16_t readADC(uint8_t ch){
     ch &= 0b00000111;  // AND operation with 7
-    ADMUX = (ADMUX & 0xF8)|ch;     // clears the bottom 3 bits before ORing
-    // start single conversion
-    // write '1' to ADSC
+    ADMUX = (ADMUX & 0xF8)|ch; // clears the bottom 3 bits before ORing
     ADCSRA |= (1<<ADSC);
  
-    // wait for conversion to complete
-    // ADSC becomes '0' again
-    // till then, run loop continuously
     while(ADCSRA & (1<<ADSC)); 
     return (ADC);
 }
 
+#endif

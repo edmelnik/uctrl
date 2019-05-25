@@ -13,6 +13,6 @@
 # main file
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial_json.c -o obj/serial_json.o
 # link
-avr-gcc -mmcu=atmega328p obj/serial.o obj/serial_json.o obj/adc.o -o bin/serial-json
+avr-gcc -mmcu=atmega328p obj/serial_json.o -o bin/serial-json
 # make hex
 avr-objcopy -O ihex -R .eeprom bin/serial-json bin/serial-json.hex
