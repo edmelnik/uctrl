@@ -7,9 +7,9 @@
 
 # compile serial_json.c
 # serial.h
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial.c -o obj/serial.o
 # adc
-avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/adc.c -o obj/adc.o
+# avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/adc.c -o obj/adc.o
 # main file
 avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c src/serial_json.c -o obj/serial_json.o
 # link

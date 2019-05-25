@@ -22,15 +22,7 @@ void uartInit(){
     UCSR0B = _BV(RXEN0) | _BV(TXEN0);   /* Enable RX and TX */
 }
 
-void uartPutchar(char c, FILE *stream){
-    /* if(c == '\n') */
-    /* 	uartPutchar('\r', stream); */
-    float k = MUX0;
-    loop_until_bit_is_set(UCSR0A, UDRE0); /* Wait for data reg */
-    UDR0 = c;
-
-    /* UDR0 = c; */
-    /* loop_until_bit_is_set(UCSR0A, TXC0); /\* wait for Tx *\/ */
+void uartPutchar(char c, FILE *stream)
 }
 
 char uartGetchar(FILE *stream){
