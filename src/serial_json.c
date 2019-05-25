@@ -15,6 +15,7 @@ struct data{
 };
 
 // Setup serial output streams for stdio
+// TODO move this to a func in serial.h
 FILE uart_output = FDEV_SETUP_STREAM(uartPutchar, NULL,
 				     _FDEV_SETUP_WRITE);
 FILE uart_input = FDEV_SETUP_STREAM(NULL, uartGetchar,
