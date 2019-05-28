@@ -66,13 +66,12 @@ int get_i2c(int mux_addr, int mux_channel, int device_addr,
 }
 
 void loop(){
-    char *buffer, *pressure, err_str[] = " ERR ";
-    int errs[4] = {0, 0, 0, 0};
+    char *buffer, *pressure;
     int i, retval, buf_ptr = 0;
 
     buffer = malloc(50);
-
     pressure = malloc(10);
+    
     // indexed by 1 to correspond with mux_channel
     for(i=1; i<5; i++){
 	retval = get_i2c(MUXADDR, i, SLAVE_ADDR,
