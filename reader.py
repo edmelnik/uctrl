@@ -21,11 +21,12 @@ ERR4: Sensor missing (check the PCB if sensor is expected to be in place)
 '''
 
 '''
-DONE if ACM0 does no exist, catch that exception and try other ttyACM*
-DONE ignore all recieved data for the first 2 seconds
+TODO Add reset condition if 3 or more timeouts detected
 TODO Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
  - This seems to be related with the number of devices the microcontroller is serving
 TODO Inspect why error numbers ERR* seem to periodically disappear
+DONE if ACM0 does no exist, catch that exception and try other ttyACM*
+DONE ignore all recieved data for the first 2 seconds
 '''
 
 # device = serial.Serial('/dev/ttyACM0', 9600, timeout=2);
@@ -86,5 +87,10 @@ def main():
         else:
             # do something with data (printing for now)
             printData(values)
-            
-main()
+
+# Don't stop even if device gets disconnected            
+while True:
+    try:
+        main()
+    except serial.SerialException:
+        continue
