@@ -1,7 +1,3 @@
-import serial
-import time
-import sys
-
 '''
 This script reads microcontroller output on serial port 
 Expected data format is bytestring of individual sensor values seperated by whitespaces. Each datapoint is seperated by a newline (\n) and return carriage (\r) . Ex. (for n data points) input will be: 
@@ -35,6 +31,10 @@ DONE Add timestamps to data
 DONE if ACM0 does no exist, catch that exception and try other ttyACM*
 DONE ignore all recieved data for the first 2 seconds
 '''
+
+import serial
+import time
+import sys
 
 # device = serial.Serial('/dev/ttyACM0', 9600, timeout=2);
 
@@ -111,5 +111,3 @@ while True:
         continue
     except:
         continue
-
-    
