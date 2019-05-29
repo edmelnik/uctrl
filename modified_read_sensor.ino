@@ -32,7 +32,7 @@ const uint32_t interval = 10;
 
 void setup(){
     /* delay(200);            // my particular board needs this */
-    Serial.begin(115200);
+    Serial.begin(9600);
     Wire.begin();
 }
 
@@ -81,5 +81,9 @@ void loop(){
 			    " %s ", pressure);
     }
     Serial.println(buffer);
+    // Flush waits for the data transfer to complete;
+    // while this would ensure no data is buffered in the microcontroller, it would result in stale
+    //  data being sent on initial connection
+    Serial.flush();
     delay(200);
 }
