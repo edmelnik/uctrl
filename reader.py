@@ -22,7 +22,7 @@ ERR4: Sensor missing (check the PCB if sensor is expected to be in place)
 
 '''
 DONE if ACM0 does no exist, catch that exception and try other ttyACM*
-TODO ignore all recieved data for the first 1 second 
+DONE ignore all recieved data for the first 2 seconds
 TODO Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
  - This seems to be related with the number of devices the microcontroller is serving
 TODO Inspect why error numbers ERR* seem to periodically disappear
@@ -44,7 +44,6 @@ def connect():
             curr_dev += 1
             curr_dev %= 10
     return device
-
 
 def initData(device):
     epoch = time.time()
@@ -88,25 +87,4 @@ def main():
             # do something with data (printing for now)
             printData(values)
             
-# while True:    
-#     output = ""
-#     # try:
-#     #     line = device.readline()
-#     #     vals = line.decode('utf-8').rsplit()
-#     # except (serial.SerialTimeoutException, UnicodeDecodeError):
-#     #     continue
-#     vals = getData()
-#     # print(vals)
-#     if len(vals) == 0: # Most likely a timeout
-#         print("TIMEOUT")
-#         device.close()
-#         device.open()
-#         continue
-#     try:
-#         for value in vals:
-#             output += value
-#             output += " "
-#         print(output)
-#     except IndexError:
-#         continue
 main()
