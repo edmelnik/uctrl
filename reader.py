@@ -1,5 +1,6 @@
 import serial
 import time
+import sys
 
 '''
 This script reads microcontroller output on serial port 
@@ -9,7 +10,11 @@ b'D1 D2 D3 ... Dn\n\r'
 
 For each sensor Di
 
-Configuration of of n is done on the microcontroller. The number of actual sensors on the PCB should be reflected in the NUM_SENSORS global in this script.
+Each datapoint is output by this script in the form of a list of strings:
+
+[TIMESTAMP D1 D2 D3 ... Dn]
+
+Configuration of of n is done on the microcontroller. This script should work as expected regardless of how many sensors are actually connected to the microcontroller
 
 ERR* indicates errors; Error numbers denote the following:
 
@@ -21,10 +26,12 @@ ERR4: Sensor missing (check the PCB if sensor is expected to be in place)
 '''
 
 '''
+
 TODO Add reset condition if 3 or more timeouts detected
 TODO Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
  - This seems to be related with the number of devices the microcontroller is serving
-TODO Inspect why error numbers ERR* seem to periodically disappear
+TODO Inspect why error numbers ERR* seem to periodically disappear (itoa problem?)
+DONE Add timestamps to data
 DONE if ACM0 does no exist, catch that exception and try other ttyACM*
 DONE ignore all recieved data for the first 2 seconds
 '''
@@ -54,9 +61,14 @@ def initData(device):
         curr_time = time.time()
         
 def getData(device):
+    vals = []
     try:
+        curr_time = time.time()
         line = device.readline()
         vals = line.decode('utf-8').rsplit()
+        curr_time = str(curr_time)
+        curr_time = curr_time[:curr_time.find('.')+3] # truncate to 2 decimal points
+        vals.insert(0, curr_time)
         return vals;
     except (serial.SerialTimeoutException, UnicodeDecodeError):
         return vals
@@ -82,7 +94,7 @@ def main():
     initData(device)
     while True:
         values = getData(device)
-        if len(values) == 0:
+        if len(values) <= 1: # only got the currtime
             device = handleTimeout(device)
         else:
             # do something with data (printing for now)
@@ -92,5 +104,12 @@ def main():
 while True:
     try:
         main()
+    except KeyboardInterrupt:
+        print("Exiting.. \n")
+        sys.exit()
     except serial.SerialException:
         continue
+    except:
+        continue
+
+    
