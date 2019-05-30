@@ -22,7 +22,13 @@ ERR4: Sensor missing (check the PCB if sensor is expected to be in place)
 '''
 
 '''
-
+TODO Add logging of errors and other messages (TIMEOUT, connecting to device on address)
+TODO A better way of reading what to do with the collected datapoints might be to have a config file in the same directory as this script: the config can allow various operations
+  - print data to STDOUT
+  - put data into SQL/Influx
+  - push data to zigbee
+  The source for each of these actions should be outside this file and imported by this file (catch errors if import fails)
+TODO use logic level converter to output on serial pins as well
 TODO Add reset condition if 3 or more timeouts detected
 TODO Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
  - This seems to be related with the number of devices the microcontroller is serving
@@ -35,8 +41,6 @@ DONE ignore all recieved data for the first 2 seconds
 import serial
 import time
 import sys
-
-# device = serial.Serial('/dev/ttyACM0', 9600, timeout=2);
 
 def connect():
     connected = False
