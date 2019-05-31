@@ -6,11 +6,11 @@ b'D1 D2 D3 ... Dn\n\r'
 
 For each sensor Di
 
-Each datapoint is output by this script in the form of a list of strings:
+Each datapoint is output by this script as a list of strings:
 
 [TIMESTAMP D1 D2 D3 ... Dn]
 
-Configuration of of n is done on the microcontroller. This script should work as expected regardless of how many sensors are actually connected to the microcontroller
+Configuration of n is done on the microcontroller. This script should work as expected regardless of how many sensors are actually connected to the microcontroller
 
 ERR* indicates errors; Error numbers denote the following:
 
