@@ -1,9 +1,25 @@
+/*
+TODO Better error checking and overall control flow
+  - Periodically monitor status and check expected O2 values
+  - O2 values could be modelled to make intelligent calibration decisions
+TODO Read multiple registers and parse the response buffer
+  - Select relevent values (see comment above func loop)
+TODO Format the output values in a similar manner to how the pressure is being formatted
+  - Might be possible to use the output function as a header file common to both
+TODO calibration routine
+TODO Combine o2 and pressure into a single grand PoC
 
+*/
 #include <ModbusMaster.h>
 #include <SoftwareSerial.h>
 
 SoftwareSerial modbus(4, 5);
 ModbusMaster node;
+
+void printStatus(int status){
+    Serial.print("Status: ");
+    Serial.println(status);
+}
 
 void setup(){
     Serial.begin(9600); // To USB output
@@ -18,105 +34,36 @@ void setup(){
     // get status
     node.readInputRegisters(30004, 1);
     response = node.getResponseBuffer(0);
-    Serial.print("Status: ");
-    Serial.println(response);    
+    printStatus(response);
+    
     if(response == 0){ // Sensor Idle
-	// Turn sensor ON
-	node.readHoldingRegisters(40006, 1);
+    	// Turn sensor ON
+    	node.writeSingleRegister(40001, 1);
+    }
+    /* 	// Wait while status changes to active (code 2) */
+    /* 	while(response < 2){ */
+    /* 	    node.readInputRegisters(30004, 1); */
+    /* 	    response = node.getResponseBuffer(0); */
+    /* 	} */
+    /* } */
+}
+
+// Output format
+// STATUS CAL O2%avg O2%raw ERR Heater_voltage ppO2real Pressure PSTemp
+// 30004 30018 30001 30002  30005 30006        30014    30016    30017
+void loop(){
+    int response=0;
+    float data;
+    if(response<2){
+	node.readInputRegisters(30004, 1);
+	response = node.getResponseBuffer(0);
+	printStatus(response);
+    }
+    while(1){
+	node.readInputRegisters(30001, 1);
+	data = node.getResponseBuffer(0);
+	Serial.print("O2%: ");
+	Serial.println(data, 5);
+	delay(500);
     }
 }
-
-void loop(){
-    int response;
-
-    delay(500);
-}
-
-/* void loop() */
-/* { */
-/*     static uint32_t i; */
-/*     uint8_t j, result; */
-/*     uint16_t data[6]; */
-
-/*     i++; */
-
-/*     // set word 0 of TX buffer to least-significant word of counter (bits 15..0) */
-/*     node.setTransmitBuffer(0, lowWord(i)); */
-
-/*     // set word 1 of TX buffer to most-significant word of counter (bits 31..16) */
-/*     node.setTransmitBuffer(1, highWord(i)); */
-
-/*     // slave: write TX buffer to (2) 16-bit registers starting at register 0 */
-/*     /\* result = node.writeMultipleRegisters(0, 2); *\/ */
-
-/*     // slave: read (6) 16-bit registers starting at register 2 to RX buffer */
-/*     result = node.readHoldingRegisters(0x9c46, 1); */
-/*     Serial.println(result); */
-/*     // do something with data if read is successful */
-/*     if (result == node.ku8MBSuccess) */
-/*     { */
-/* 	for (j = 0; j < 6; j++) */
-/* 	{ */
-/* 	    data[j] = node.getResponseBuffer(j); */
-/* 	    Serial.println(data[j]); */
-/* 	} */
-/*     } */
-/* } */
-
-/* #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library */
-/* #include <ArduinoModbus.h> */
-
-/* int counter = 0; */
-
-/* void setup() { */
-/*   Serial.begin(9600); */
-/*   while (!Serial); */
-
-/*   Serial.println("Modbus RTU Client Kitchen Sink"); */
-
-/*   // start the Modbus RTU client */
-/*   if (!ModbusRTUClient.begin(9600)) { */
-/*     Serial.println("Failed to start Modbus RTU Client!"); */
-/*     while (1); */
-/*   } */
-/* } */
-
-/* void loop() { */
-/*   /\* writeCoilValues(); *\/ */
-
-/*   /\* readCoilValues(); *\/ */
-
-/*   /\* readDiscreteInputValues(); *\/ */
-
-/*   /\* writeHoldingRegisterValues(); *\/ */
-
-/*   readHoldingRegisterValues(); */
-
-/*   /\* readInputRegisterValues(); *\/ */
-
-/*   counter++; */
-
-/*   delay(5000); */
-/*   Serial.println(); */
-/* } */
-
-/* void readHoldingRegisterValues() { */
-/*   Serial.print("Reading Input Register values ... "); */
-
-/*   // read 10 Input Register values from (slave) id 42, address 0x00 */
-/*   if (!ModbusRTUClient.holdingRegisterRead(3, 0x00)){ */
-/*     Serial.print("failed! "); */
-/*     Serial.println(ModbusRTUClient.lastError()); */
-/*   } else { */
-/*     Serial.println("success"); */
-
-/*     while (ModbusRTUClient.available()) { */
-/*       Serial.print(ModbusRTUClient.read()); */
-/*       Serial.print(' '); */
-/*     } */
-/*     Serial.println(); */
-/*   } */
-
-/*   // Alternatively, to read a single Holding Register value use: */
-/*   // ModbusRTUClient.holdingRegisterRead(...) */
-/* } */
