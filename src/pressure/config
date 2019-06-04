@@ -1,0 +1,5 @@
+[output]
+stdout=1
+zigbee=0
+db=0
+csv=0
