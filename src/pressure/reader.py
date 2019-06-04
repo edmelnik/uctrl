@@ -52,9 +52,10 @@ import time
 import sys
 import configparser
 
-# Output values
+# Output values in config file
 STDOUT = 'stdout'
 XBEE   = 'zigbee'
+INFLUX = 'influx'
 
 def connect(config):
     connected = False
