@@ -1,5 +1,8 @@
+[input]
+device=/dev/ttyACM
+
 [output]
 stdout=1
 zigbee=0
-db=0
+influx=0
 csv=0

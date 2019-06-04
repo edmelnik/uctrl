@@ -44,6 +44,7 @@ DONE ignore all recieved data for the first 2 seconds
 '''
 NOTES and thoughts
 - error logging should be smart: every error occurence should not be necessarily logged since in the main while loop the error would occur many times a second. can use a timer to time error occurence frequency (is there a module for this?)
+- many different things are now being done in this file that should probably be split into their own files
 '''
 
 import serial
@@ -53,12 +54,12 @@ import configparser
 
 # Output values
 STDOUT = 'stdout'
-XBEE = 'zigbee'
+XBEE   = 'zigbee'
 
-def connect():
+def connect(config):
     connected = False
     curr_dev = 0 # ttyACM* dev number
-    dev_addr = "/dev/ttyACM"
+    dev_addr = config['input']['device']
     curr_dev_addr = ""
     while not connected:
         curr_dev_addr = dev_addr + str(curr_dev)
@@ -104,42 +105,34 @@ def printData(values):
             output += " "
         print(output)
     except IndexError:
-        pass
-    
-'''
-This function returns only the output section from config file
-in the future, if more sections are needed, perhaps a custom config
-class would be easier (or maybe a function with a section-specifying parameter)
-'''
-def readOutputConfig(config):
-    config.read("config")
-    return config['output']
+        pass    
 
-def doOutput(output, values):
+def doOutput(config, values):
+    output = config['output']
     if int(output[XBEE]) == 1:
         pass
     if int(output[STDOUT]) == 1: # not elif for more than one output
         printData(values)    
         
 def main():
-    device = connect()
     config = configparser.ConfigParser()
+    config.read("config")
+    device = connect(config)
     initData(device)
     while True:
-        config.read("config")
-        output = readOutputConfig(config)
+        config.read("config") # Read config for changes
+        # output = readOutputConfig(config)
         values = getData(device)
-        if len(values) <= 1: # only got the currtime
+        if len(values) <= 1: # only got the currtime, most likely timeout
             device = handleTimeout(device)
         else:
-            doOutput(output, values)
+            doOutput(config, values)
 
 # Don't stop even if device gets disconnected            
 while True:
     try:
         main()
     except KeyboardInterrupt:
-        print("Exiting.. \n")
         sys.exit()
     except serial.SerialException:
         continue
