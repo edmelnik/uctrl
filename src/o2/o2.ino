@@ -1,19 +1,36 @@
 
-/* #include <ModbusMaster.h> */
+#include <ModbusMaster.h>
+#include <SoftwareSerial.h>
 
+SoftwareSerial modbus(4, 5);
+ModbusMaster node;
 
-/* ModbusMaster node; */
+void setup(){
+    Serial.begin(9600); // To USB output
+    modbus.begin(9600); // To/from Oxygen sensors
+    node.begin(3, modbus);
+    int response;
+    // Get address
+    node.readHoldingRegisters(40006, 1);
+    response = node.getResponseBuffer(0);
+    Serial.print("Sensor address: ");
+    Serial.println(response);
+    // get status
+    node.readInputRegisters(30004, 1);
+    response = node.getResponseBuffer(0);
+    Serial.print("Status: ");
+    Serial.println(response);    
+    if(response == 0){ // Sensor Idle
+	// Turn sensor ON
+	node.readHoldingRegisters(40006, 1);
+    }
+}
 
-/* void setup(){ */
-/*     Serial.begin(9600); // To USB output */
-/*     Serial1.begin(9600); // To/from Oxygen sensors */
-/*     node.begin(3, Serial1); */
-/* } */
+void loop(){
+    int response;
 
-/* /\* void loop(){ *\/ */
-/* /\*     int result = node.readHoldingRegisters(40006, 1); *\/ */
-/* /\*     Serial.println(result); *\/ */
-/* /\* } *\/ */
+    delay(500);
+}
 
 /* void loop() */
 /* { */
@@ -46,60 +63,60 @@
 /*     } */
 /* } */
 
-#include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library
-#include <ArduinoModbus.h>
+/* #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library */
+/* #include <ArduinoModbus.h> */
 
-int counter = 0;
+/* int counter = 0; */
 
-void setup() {
-  Serial.begin(9600);
-  while (!Serial);
+/* void setup() { */
+/*   Serial.begin(9600); */
+/*   while (!Serial); */
 
-  Serial.println("Modbus RTU Client Kitchen Sink");
+/*   Serial.println("Modbus RTU Client Kitchen Sink"); */
 
-  // start the Modbus RTU client
-  if (!ModbusRTUClient.begin(9600)) {
-    Serial.println("Failed to start Modbus RTU Client!");
-    while (1);
-  }
-}
+/*   // start the Modbus RTU client */
+/*   if (!ModbusRTUClient.begin(9600)) { */
+/*     Serial.println("Failed to start Modbus RTU Client!"); */
+/*     while (1); */
+/*   } */
+/* } */
 
-void loop() {
-  /* writeCoilValues(); */
+/* void loop() { */
+/*   /\* writeCoilValues(); *\/ */
 
-  /* readCoilValues(); */
+/*   /\* readCoilValues(); *\/ */
 
-  /* readDiscreteInputValues(); */
+/*   /\* readDiscreteInputValues(); *\/ */
 
-  /* writeHoldingRegisterValues(); */
+/*   /\* writeHoldingRegisterValues(); *\/ */
 
-  readHoldingRegisterValues();
+/*   readHoldingRegisterValues(); */
 
-  /* readInputRegisterValues(); */
+/*   /\* readInputRegisterValues(); *\/ */
 
-  counter++;
+/*   counter++; */
 
-  delay(5000);
-  Serial.println();
-}
+/*   delay(5000); */
+/*   Serial.println(); */
+/* } */
 
-void readHoldingRegisterValues() {
-  Serial.print("Reading Input Register values ... ");
+/* void readHoldingRegisterValues() { */
+/*   Serial.print("Reading Input Register values ... "); */
 
-  // read 10 Input Register values from (slave) id 42, address 0x00
-  if (!ModbusRTUClient.holdingRegisterRead(3, 0x00)){
-    Serial.print("failed! ");
-    Serial.println(ModbusRTUClient.lastError());
-  } else {
-    Serial.println("success");
+/*   // read 10 Input Register values from (slave) id 42, address 0x00 */
+/*   if (!ModbusRTUClient.holdingRegisterRead(3, 0x00)){ */
+/*     Serial.print("failed! "); */
+/*     Serial.println(ModbusRTUClient.lastError()); */
+/*   } else { */
+/*     Serial.println("success"); */
 
-    while (ModbusRTUClient.available()) {
-      Serial.print(ModbusRTUClient.read());
-      Serial.print(' ');
-    }
-    Serial.println();
-  }
+/*     while (ModbusRTUClient.available()) { */
+/*       Serial.print(ModbusRTUClient.read()); */
+/*       Serial.print(' '); */
+/*     } */
+/*     Serial.println(); */
+/*   } */
 
-  // Alternatively, to read a single Holding Register value use:
-  // ModbusRTUClient.holdingRegisterRead(...)
-}
+/*   // Alternatively, to read a single Holding Register value use: */
+/*   // ModbusRTUClient.holdingRegisterRead(...) */
+/* } */
