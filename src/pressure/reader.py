@@ -12,8 +12,7 @@ Each datapoint is output by this script as a list of strings:
 
 Configuration of n is done on the microcontroller. This script should work as expected regardless of how many sensors are actually connected to the microcontroller
 
-ERR* indicates errors; Error numbers denote the following:
-
+ERR* indicates errors; Error numbers denote the following: (FOR PRESSURE ONLY)
 ERR1: Chip stuck in command mode
 ERR2: Stale data (data has been already recieved)
 ERR3: Sensor diagnostic fault
@@ -22,6 +21,7 @@ ERR4: Sensor missing (check the PCB if sensor is expected to be in place)
 '''
 
 '''
+TODO Now that oxygen is connected and works, this script (especially the errors) should be generalized to input and output arbitrary sensor data
 TODO Add logging of errors and other messages (TIMEOUT, connecting to device on address)
 TODO use logic level converter to output on serial pins as well
 TODO Add reset condition if 3 or more timeouts detected
