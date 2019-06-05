@@ -32,11 +32,11 @@ Will the ~ PWM pins with this? Should any strange and unexpected errors occur in
 #define ADDR_REG   40006
 
 // System status
-// const int IDLE     = 0;
-// const int STARTUP  = 1;
-// const int ON       = 2;
-// const int SHUTDOWN = 3;
-// const int STANDBY  = 4;
+const int IDLE     PROGMEM = 0;
+const int STARTUP  PROGMEM = 1;
+const int ON       PROGMEM = 2;
+const int SHUTDOWN PROGMEM = 3;
+const int STANDBY  PROGMEM = 4;
 
 SoftwareSerial modbus[NUM_SENSORS] = {
     SoftwareSerial(10, 11),
@@ -50,11 +50,6 @@ ModbusMaster node[NUM_SENSORS];
 // Status < 0 means there's an active error code in err[] for the sensor
 // Error == 0 means that there's sensor status value = valid
 int status[NUM_SENSORS], response[NUM_SENSORS], err[NUM_SENSORS];
-
-void printStatus(int status){
-    Serial.print("Status: ");
-    Serial.println(status);
-}
 
 /*
 
@@ -101,6 +96,7 @@ int writeReg(int sensor, int reg, int value){
 }
 
 void setup(){
+    delay(200);
     int i, SST_addr;    
     Serial.begin(BAUD); // To USB output    
     // Actual sensor addresses are indexed by 1, but
@@ -109,6 +105,8 @@ void setup(){
 	SST_addr = i+1;
 	modbus[i].begin(BAUD);
 	node[i].begin(SST_addr, modbus[i]);
+	Serial.print("address: ");
+	Serial.println(SST_addr);
     }
     
     // Get status
@@ -118,7 +116,7 @@ void setup(){
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++){
-	if(status[i] == 0)
+	if(status[i] == IDLE)
 	    err[i] = writeReg(i, ONOFF_REG, 1);
     }
 
@@ -145,7 +143,7 @@ void loop(){
     for(i=0; i<NUM_SENSORS; i++){
 	char errstr[20] = "ERR", *errval, output[10];
 	errval = malloc(3);
-	if(status[i] == 2){
+	if(status[i] == ON){
 	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
 		// do something
