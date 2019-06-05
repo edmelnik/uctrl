@@ -55,6 +55,7 @@ int get_i2c(int mux_addr, int mux_channel, int device_addr,
     if(el <= 4 && el >= 1){
 	strcat(errstr, itoa(el, errval, 10));
 	strcpy(pressure_out, errstr);
+	free(errval);
 	return -1;
     }
     else{
@@ -62,6 +63,7 @@ int get_i2c(int mux_addr, int mux_channel, int device_addr,
 	dtostrf(p, 2, 3, p_str); 
 	dtostrf(t, 2, 3, t_str);	
 	strcpy(pressure_out, p_str);
+	free(errval);
 	return 1;
     }           
 }
@@ -85,5 +87,7 @@ void loop(){
     // while this would ensure no data is buffered in the microcontroller, it would result in stale
     //  data being sent on initial connection
     Serial.flush();
+    free(buffer);
+    free(pressure);
     delay(200);
 }
