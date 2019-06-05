@@ -125,7 +125,8 @@ def main():
         # output = readOutputConfig(config)
         values = getData(device)
         if len(values) <= 1: # only got the currtime, most likely timeout
-            device = handleTimeout(device)
+            # device = handleTimeout(device)
+            pass
         else:
             doOutput(config, values)
 

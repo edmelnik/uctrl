@@ -32,17 +32,17 @@ Will the ~ PWM pins with this? Should any strange and unexpected errors occur in
 #define ADDR_REG   40006
 
 // System status
-const int IDLE     = 0;
-const int STARTUP  = 1;
-const int ON       = 2;
-const int SHUTDOWN = 3;
-const int STANDBY  = 4;
+// const int IDLE     = 0;
+// const int STARTUP  = 1;
+// const int ON       = 2;
+// const int SHUTDOWN = 3;
+// const int STANDBY  = 4;
 
 SoftwareSerial modbus[NUM_SENSORS] = {
     SoftwareSerial(10, 11),
     SoftwareSerial(6, 7),
-    SoftwareSerial(8, 9),
-    SoftwareSerial(4, 5)
+    SoftwareSerial(4, 5),
+    SoftwareSerial(8, 9)
 };
 
 ModbusMaster node[NUM_SENSORS];
@@ -58,7 +58,7 @@ void printStatus(int status){
 
 /*
 
-TODO parse protocol errors
+DONE parse protocol errors
 
 Response codes
 0  Success
@@ -71,7 +71,7 @@ Response codes
 
 This func expects int representations of hex error values and converts them 
 into errors in [-1, -4]
- */
+*/
 int parseError(float e){
     int ret;
     if(e == 0)
@@ -85,8 +85,10 @@ float readReg(int sensor, int reg){
     int res;
     float val;
     res = node[sensor].readInputRegisters(reg, 1);
-    if(res == 0)
+    if(res == 0){
 	val = node[sensor].getResponseBuffer(0);
+	node[sensor].clearResponseBuffer();
+    }
     else
 	return parseError(res);
     return val;    
@@ -99,32 +101,25 @@ int writeReg(int sensor, int reg, int value){
 }
 
 void setup(){
-    int i;    
+    int i, SST_addr;    
     Serial.begin(BAUD); // To USB output    
     // Actual sensor addresses are indexed by 1, but
     // once sensor addresses are configured in node[], they should indexed by 0
     for(i=0; i<NUM_SENSORS; i++){
+	SST_addr = i+1;
 	modbus[i].begin(BAUD);
-	node[i].begin(3, modbus[i]);
+	node[i].begin(SST_addr, modbus[i]);
     }
     
     // Get status
     for(i=0; i<NUM_SENSORS; i++){
 	err[i] = status[i] = readReg(i, STATUS_REG);
-	// Serial.print("Status for ");
-	// Serial.print(i+1);
-	// Serial.print(" ");
-	// Serial.println(status[i]);
     }
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++){
-	// if(status[i] == IDLE)
+	if(status[i] == 0)
 	    err[i] = writeReg(i, ONOFF_REG, 1);
-	    // Serial.print("Status for ");
-	    // Serial.print(i+1);
-	    // Serial.print(" ");
-	    // Serial.println(status[i]);
     }
 
     // At this point ideally all sensors are turned on.
@@ -150,7 +145,7 @@ void loop(){
     for(i=0; i<NUM_SENSORS; i++){
 	char errstr[20] = "ERR", *errval, output[10];
 	errval = malloc(3);
-	if(status[i] == ON){
+	if(status[i] == 2){
 	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
 		// do something
@@ -164,10 +159,15 @@ void loop(){
 	}
 	buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
 			    " %s ", output);
+	free(errval);
     }
     Serial.println(buffer);
+    free(buffer);
+    
     k+=1;
-    k%=10;	
+    k%=10;
+    
+    // delay(100);
 }
 
 
