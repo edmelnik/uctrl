@@ -39,10 +39,10 @@ const int SHUTDOWN = 3;
 const int STANDBY  = 4;
 
 SoftwareSerial modbus[NUM_SENSORS] = {
+    SoftwareSerial(10, 11),
     SoftwareSerial(6, 7),
     SoftwareSerial(8, 9),
-    SoftwareSerial(4, 5),
-    SoftwareSerial(10, 11)
+    SoftwareSerial(4, 5)
 };
 
 ModbusMaster node[NUM_SENSORS];
@@ -72,9 +72,9 @@ Response codes
 This func expects int representations of hex error values and converts them 
 into errors in [-1, -4]
  */
-float parseError(float e){
-    float ret;
-    if(e <= 5) // Valid status code OR valid (0 response)
+int parseError(float e){
+    int ret;
+    if(e == 0)
 	ret = e;
     else
 	ret = 0-((int)e % 223);
@@ -88,37 +88,43 @@ float readReg(int sensor, int reg){
     if(res == 0)
 	val = node[sensor].getResponseBuffer(0);
     else
-	return (float)res;
+	return parseError(res);
     return val;    
 }
 // If this func is taking an int parameter for value, can it be used for calibration?
 int writeReg(int sensor, int reg, int value){
     int res;
     res = node[sensor].writeSingleRegister(reg, value);
-    return res;
+    return parseError(res);
 }
 
 void setup(){
-    int i;
-    // These should be global
-    
+    int i;    
     Serial.begin(BAUD); // To USB output    
     // Actual sensor addresses are indexed by 1, but
     // once sensor addresses are configured in node[], they should indexed by 0
     for(i=0; i<NUM_SENSORS; i++){
 	modbus[i].begin(BAUD);
-	node[i].begin(i+1, modbus[i]);
+	node[i].begin(3, modbus[i]);
     }
     
     // Get status
     for(i=0; i<NUM_SENSORS; i++){
-	err[i] = status[i] = parseError(readReg(i, STATUS_REG));
+	err[i] = status[i] = readReg(i, STATUS_REG);
+	// Serial.print("Status for ");
+	// Serial.print(i+1);
+	// Serial.print(" ");
+	// Serial.println(status[i]);
     }
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++){
 	// if(status[i] == IDLE)
-	    err[i] = parseError(writeReg(i, ONOFF_REG, 1));
+	    err[i] = writeReg(i, ONOFF_REG, 1);
+	    // Serial.print("Status for ");
+	    // Serial.print(i+1);
+	    // Serial.print(" ");
+	    // Serial.println(status[i]);
     }
 
     // At this point ideally all sensors are turned on.
@@ -140,18 +146,17 @@ void loop(){
     float data;    
     char *buffer;
     buffer = malloc(50);
-
     
     for(i=0; i<NUM_SENSORS; i++){
 	char errstr[20] = "ERR", *errval, output[10];
 	errval = malloc(3);
 	if(status[i] == ON){
-	    data = parseError(readReg(i, O2AVG_REG));
+	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
 		// do something
 	    }
 	    else
-		dtostrf(data, 2, 3, output); 
+		dtostrf(data, 2, 3, output);
 	}
 	else{
 	    strcat(errstr, itoa(-1*err[i], errval, 10));
@@ -161,19 +166,8 @@ void loop(){
 			    " %s ", output);
     }
     Serial.println(buffer);
-    Serial.flush();
-    delay(200);
-    // float data;
-    // if(response<2){
-    // 	node.readInputRegisters(30004, 1);
-    // 	response = node.getResponseBuffer(0);
-    // 	printStatus(response);
-    // }
-    // while(1){
-    // 	node.readInputRegisters(30001, 1);
-    // 	data = node.getResponseBuffer(0);
-    // 	Serial.print("O2%: ");
-    // 	Serial.println(data, 5);
-    // 	delay(500);
-    // }
+    k+=1;
+    k%=10;	
 }
+
+
