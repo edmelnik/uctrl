@@ -32,20 +32,24 @@ Will the ~ PWM pins with this? Should any strange and unexpected errors occur in
 #define ADDR_REG   40006
 
 // System status
-const int IDLE     PROGMEM = 0;
-const int STARTUP  PROGMEM = 1;
-const int ON       PROGMEM = 2;
-const int SHUTDOWN PROGMEM = 3;
-const int STANDBY  PROGMEM = 4;
+const static int IDLE     PROGMEM = 0;
+const static int STARTUP  PROGMEM = 1;
+const static int ON       PROGMEM = 2;
+const static int SHUTDOWN PROGMEM = 3;
+const static int STANDBY  PROGMEM = 4;
 
 SoftwareSerial modbus[NUM_SENSORS] = {
-    SoftwareSerial(10, 11),
-    SoftwareSerial(6, 7),
     SoftwareSerial(4, 5),
-    SoftwareSerial(8, 9)
+    SoftwareSerial(6, 7),
+    SoftwareSerial(8, 9),
+    SoftwareSerial(10, 11),
 };
 
-ModbusMaster node[NUM_SENSORS];
+// SoftwareSerial *modbus = malloc(130);
+
+// ModbusMaster node[NUM_SENSORS];
+
+ModbusMaster *node =malloc(sizeof(ModbusMaster)*4);
 
 // Status < 0 means there's an active error code in err[] for the sensor
 // Error == 0 means that there's sensor status value = valid
@@ -97,21 +101,27 @@ int writeReg(int sensor, int reg, int value){
 
 void setup(){
     delay(200);
+    
     int i, SST_addr;    
     Serial.begin(BAUD); // To USB output    
     // Actual sensor addresses are indexed by 1, but
     // once sensor addresses are configured in node[], they should indexed by 0
+
+    
     for(i=0; i<NUM_SENSORS; i++){
-	SST_addr = i+1;
-	modbus[i].begin(BAUD);
-	node[i].begin(SST_addr, modbus[i]);
-	Serial.print("address: ");
-	Serial.println(SST_addr);
+    	SST_addr = i+1;
+    	modbus[i].begin(BAUD);
+	node[i] = *(new ModbusMaster);
+    	node[i].begin(3, modbus[i]);
+    	// Serial.print("address: ");
+    	// Serial.println(SST_addr);
+    	// Serial.flush();	
     }
     
     // Get status
     for(i=0; i<NUM_SENSORS; i++){
-	err[i] = status[i] = readReg(i, STATUS_REG);
+	status[i] = readReg(i, STATUS_REG);
+	err[i] = status[i];
     }
     
     // If sensor is idle, turn it on
@@ -160,12 +170,12 @@ void loop(){
 	free(errval);
     }
     Serial.println(buffer);
+    Serial.flush();
     free(buffer);
     
     k+=1;
-    k%=10;
-    
-    // delay(100);
+    k%=10;    
+    delay(100);
 }
 
 
