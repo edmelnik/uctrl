@@ -113,9 +113,6 @@ void setup(){
     // once sensor addresses are configured in node[], they should indexed by 0
     for(i=0; i<NUM_SENSORS; i++){
     	SST_addr = i+1;
-	// modbus[i] = *(new SoftwareSerial(curr_pin, curr_pin+1));
-	// curr_pin+=2;
-	
     	modbus[i].begin(BAUD);
 	node[i] = *(new ModbusMaster);
     	node[i].begin(SST_addr, modbus[i]);
@@ -150,7 +147,7 @@ void setup(){
 
 int k = 0;
 
-void handleSensor(int i){
+Void handleSensor(int i){
     status[i] = readReg(i, STATUS_REG);
     err[i] = status[i];
     if(status[i] == IDLE || status[i] == STANDBY)
