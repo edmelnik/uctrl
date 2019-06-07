@@ -33,8 +33,8 @@
 #define ERR_CLR_REG 40002
 
 // Starting PIN on the microcontroller
-const static int START_PIN PROGMEM = 4;
-
+const static unsigned int START_PIN PROGMEM = 4;
+const static unsigned int CHK_DELAY = 10;
 // System status
 const static int IDLE     PROGMEM = 0;
 const static int STARTUP  PROGMEM = 1;
@@ -175,13 +175,13 @@ void loop(){
 	else if(status[i] >= 0){
 	    strcat(statstr, itoa(status[i], errval, 10));
 	    strcpy(output, statstr);
-	    if(k==10)
+	    if(k==CHK_DELAY)
 		handleSensor(i);
 	}
 	else{	    
 	    strcat(errstr, itoa(status[i]*-1, errval, 10));
 	    strcpy(output, errstr);
-	    if(k==10)
+	    if(k==CHK_DELAY)
 		handleSensor(i);
 	}
 	buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
@@ -195,7 +195,7 @@ void loop(){
     free(buffer);
     
     k+=1;
-    k%=11;    
+    k%=11;
     // delay(100);
 }
 
