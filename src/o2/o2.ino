@@ -172,22 +172,22 @@ void loop(){
 		dtostrf(data, 4, 0, output);
 	    }
 	}
-	else if(status[i] > 0){
+	else if(status[i] >= 0){
 	    strcat(statstr, itoa(status[i], errval, 10));
 	    strcpy(output, statstr);
-	    if(k==100)
+	    if(k==10)
 		handleSensor(i);
 	}
 	else{	    
 	    strcat(errstr, itoa(status[i]*-1, errval, 10));
 	    strcpy(output, errstr);
-	    if(k==100)
+	    if(k==10)
 		handleSensor(i);
 	}
 	buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
 			    " %s ", output);
 	free(errval);
-	delay(3);
+	delay(4);
     }
     
     Serial.println(buffer);
@@ -195,7 +195,7 @@ void loop(){
     free(buffer);
     
     k+=1;
-    k%=101;    
+    k%=11;    
     // delay(100);
 }
 
