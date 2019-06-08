@@ -136,7 +136,7 @@ void setup(){
     for(i=0; i<NUM_SENSORS; i++){
     	SST_addr = i+1;
 	node[i] = *(new ModbusMaster);
-	node[i].begin(SST_addr, modbus);	
+	node[i].begin(SST_addr, modbus);
     
     }   
     // If sensor is idle, turn it on
