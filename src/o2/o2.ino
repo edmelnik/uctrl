@@ -42,6 +42,11 @@ const static int ON       PROGMEM = 2;
 const static int SHUTDOWN PROGMEM = 3;
 const static int STANDBY  PROGMEM = 4;
 
+// Calibration status codes
+const static int CAL_IDLE PROGMEM = 0;
+const static int CAL_PROG PROGMEM = 1;
+const static int CAL_DONE PROGMEM = 2;
+
 // SoftwareSerial modbus[NUM_SENSORS] = {
 //     SoftwareSerial(START_PIN, START_PIN+1),
 //     SoftwareSerial(START_PIN+2, START_PIN+3),
@@ -58,7 +63,7 @@ ModbusMaster *node =malloc(sizeof(ModbusMaster)*4);
 
 // Status < 0 means there's an active error code in err[] for the sensor
 // Error == 0 means that there's sensor status value = valid
-int status[NUM_SENSORS], response[NUM_SENSORS], err[NUM_SENSORS];
+int status[NUM_SENSORS], cal[NUM_SENSORS];
 
 /*
 
