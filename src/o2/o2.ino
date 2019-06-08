@@ -26,6 +26,7 @@
 #define O2AVG_REG  30001
 #define STATUS_REG 30004
 #define ERR_REG    30005
+#define CALSTS_REG 30018
 // Holding regs
 #define ONOFF_REG   40001
 #define CLCTRL_REG  40004 // Calibration control
@@ -132,6 +133,46 @@ void handleSensor(int i){
     }
 }
 
+void calibrate(){
+    int i, done = 0, curr_calsts, res;
+    char *buffer;
+    
+    for(i=0; i<NUM_SENSORS; i++){ // start calibration
+	res = writeReg(i, CLCTRL_REG, 1);
+	if(res == 0)
+	    cal[i] = CAL_PROG;	
+    }    
+    while(done < 4){ // keep checking if calibration is done on all sensors
+	buffer = malloc(15);
+	int buf_ptr = 0;
+	
+	for(i=0; i<NUM_SENSORS; i++){
+	    char calstr[10] = "CAL", output[10], *errval;
+	    errval = malloc(3);
+	    
+	    curr_calsts = readReg(i, CALSTS_REG);
+	    if(curr_calsts == CAL_DONE){
+		done++;
+		cal[i] = CAL_DONE;
+	    }
+	    strcat(calstr, itoa(cal[i], errval, 10));
+	    strcpy(output, calstr);
+	    buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
+				" %s ", output);
+	    free(errval);
+	}
+	
+	Serial.println(buffer);
+	Serial.flush();
+	free(buffer);
+	delay(100);
+    }
+    for (i=0; i<NUM_SENSORS; i++){ // reset calibration
+	writeReg(i, CLCTRL_REG, 2);
+	cal[i] = CAL_IDLE;
+    }
+}
+
 void setup(){    
     int i, curr_pin, SST_addr;    
     Serial.begin(BAUD); // To USB output
@@ -150,6 +191,7 @@ void setup(){
 	    status[i] = writeReg(i, ONOFF_REG, 1);
     }
 
+    pinMode(12, INPUT_PULLUP);
     // At this point ideally all sensors are turned on.
     // Sensors that have an active error code and not turned on
     //  should be handled appropriately in loop()
@@ -167,7 +209,9 @@ void loop(){
 	char errstr[10] = "ERR", *errval, output[10];
 	char statstr[10] = "STS";
 	errval = malloc(3);
-
+	
+	if(k == CHK_DELAY && digitalRead(12) == LOW) // Calibration check
+	    calibrate();
 	if(status[i] == ON){
 	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
