@@ -167,6 +167,8 @@ void loop(){
 	char statstr[10] = "STS";
 	errval = malloc(3);
 
+	if(k == CHK_DELAY*5) // Just a check to make sure the sensor is not dead
+	    handleSensor(i);
 	if(status[i] == ON){
 	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
