@@ -184,12 +184,11 @@ void setup(){
 	node[i] = *(new ModbusMaster);
 	node[i].begin(SST_addr, modbus);
     
-    }   
-    // If sensor is idle, turn it on
-    for(i=0; i<NUM_SENSORS; i++){
-	if(status[i] == IDLE || status[i] == STANDBY)
-	    status[i] = writeReg(i, ONOFF_REG, 1);
     }
+    
+    // If sensor is idle, turn it on
+    for(i=0; i<NUM_SENSORS; i++)
+	handSensor(i);
 
     pinMode(12, INPUT_PULLUP);
     // At this point ideally all sensors are turned on.
