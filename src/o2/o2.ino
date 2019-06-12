@@ -26,6 +26,7 @@
 #define O2AVG_REG  30001
 #define STATUS_REG 30004
 #define ERR_REG    30005
+#define CALSTS_REG 30018
 // Holding regs
 #define ONOFF_REG   40001
 #define CLCTRL_REG  40004 // Calibration control
@@ -34,6 +35,7 @@
 
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
+// Delay for periodic checks (status, calibration et cetera)
 const static unsigned int CHK_DELAY = 10;
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -121,15 +123,19 @@ int writeReg(int sensor, int reg, int value){
 }
 
 void handleSensor(int i){
-    int res;
+    int res, cal_res;
+    cal[i] = readReg(i, CALSTS_REG);
     status[i] = readReg(i, STATUS_REG);
-    if(status[i] == IDLE || status[i] == STANDBY){
+    
+    // Turn sensor on if: it's idle OR on standby and not being calibrated
+    if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){
 	res = writeReg(i, ONOFF_REG, 1);
 	if(res < 0)
 	    status[i] = res;
 	else
 	    status[i] = readReg(i, STATUS_REG);
     }
+    
 }
 
 void setup(){    
@@ -147,7 +153,7 @@ void setup(){
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++)
-	handSensor(i);
+	handleSensor(i);
 
     // At this point ideally all sensors are turned on.
     // Sensors that have an active error code and not turned on
@@ -167,6 +173,8 @@ void loop(){
 	char statstr[10] = "STS";
 	errval = malloc(3);
 
+	if(k == CHK_DELAY*5) // Just a check to make sure the sensor is not dead
+	    handleSensor(i);
 	if(status[i] == ON){
 	    data = readReg(i, O2AVG_REG);
 	    if(data < 0){ // Error
@@ -198,8 +206,8 @@ void loop(){
     Serial.flush();
     free(buffer);
     
-    k+=1;
-    k%=11;
+    k += 1;
+    k %= (CHK_DELAY+1);
     // delay(100);
 }
 
