@@ -187,9 +187,9 @@ void setup(){
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++)
-	handSensor(i);
+	handleSensor(i);
 
-    pinMode(12, INPUT_PULLUP);
+    pinMode(12, INPUT);
     // At this point ideally all sensors are turned on.
     // Sensors that have an active error code and not turned on
     //  should be handled appropriately in loop()
@@ -208,7 +208,7 @@ void loop(){
 	char statstr[10] = "STS";
 	errval = malloc(3);
 	
-	if(k == CHK_DELAY && digitalRead(12) == LOW) // Calibration check
+	if(k == CHK_DELAY && digitalRead(12) == HIGH) // Calibration check
 	    calibrate();
 	if(status[i] == ON){
 	    data = readReg(i, O2AVG_REG);
