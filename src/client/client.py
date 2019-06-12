@@ -109,7 +109,7 @@ def doOutput(config, values):
         if output[module] == "1":
             try:
                 return_status = getattr(sys.modules[module], OUTPUT_FUNC)(values)
-            except: # this can catch TypeError, AttributeError, ModuleNotFoundError
+            except: # TODO Log
                 continue
         
 def main():
@@ -126,7 +126,6 @@ def main():
     initData(device)
     while True:
         config.read("config") # Read config for changes
-        # output = readOutputConfig(config)
         values = getData(device)
         if len(values) <= 1: # only got the currtime, most likely timeout
             # device = handleTimeout(device)
@@ -136,11 +135,11 @@ def main():
 
 # Don't stop even if device gets disconnected            
 while True:
-    # try:
-    main()
-    # except KeyboardInterrupt:
-    #     sys.exit()
-    # except serial.SerialException:
-    #     continue
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit()
+    except serial.SerialException:
+        continue
     # except:
     #     continue
