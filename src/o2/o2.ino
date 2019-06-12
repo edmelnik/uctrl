@@ -276,10 +276,10 @@ void loop(){
 	    free(output);
 	    delay(4);
 	}
+	Serial.println(buffer);
+	Serial.flush();
+	free(buffer);
     }
-    Serial.println(buffer);
-    Serial.flush();
-    free(buffer);
     
     k+=1;
     k%=(CHK_DELAY+1);
