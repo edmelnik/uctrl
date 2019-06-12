@@ -35,7 +35,7 @@
 
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
-const static unsigned int CHK_DELAY = 10;
+const static unsigned int CHK_DELAY = 40;
 // System status
 const static int IDLE     PROGMEM = 0;
 const static int STARTUP  PROGMEM = 1;
@@ -133,42 +133,100 @@ void handleSensor(int i){
     }
 }
 
+/*
+
+ Data, error, status, calibration output handler used by loop() and calibrate()
+ Cal out is a boolean: 1 if called by calibration and only prints cal status (does not set data)
+
+*/
+int getVal(int sensor, char *output, unsigned int cal_out=0){
+    int retval, data;
+    char o2_str[10], errstr[10] = "ERR", *errval, statstr[10] = "STS";
+    char calstr[10] = "CAL";
+       
+    errval = malloc(3);
+    
+    if(cal_out > 0){
+	strcat(calstr, itoa(cal[sensor], errval, 10));
+	strcpy(cal_out, calstr);
+	retval = 1;
+    }
+    else if(status[sensor] == ON){
+	data = readReg(sensor, O2AVG_REG);
+	if(data < 0){ // Error
+	    retval = -1;
+	}
+	else{
+	    dtostrf(data, 4, 0, o2_str);
+	    strcpy(output, o2_str);
+	    retval = 1;
+	}
+    }
+    else{
+	if(status[sensor] >= 0){
+	    strcat(statstr, itoa(status[sensor], errval, 10));
+	    strcpy(output, statstr);
+	    retval = -2;
+	}
+	else{	    
+	    strcat(errstr, itoa(status[sensor]*-1, errval, 10));
+	    strcpy(output, errstr);
+	    retval = -3;
+	}
+    }
+    free(errval);
+    return retval;
+}
+
 void calibrate(){
-    int i, done = 0, curr_calsts, res;
-    char *buffer;
+    int i, done = 0, curr_calsts, res, retval;
+    char *buffer, *sts;
     
     for(i=0; i<NUM_SENSORS; i++){ // start calibration
+	if(status[i] != ON) // If in error state, don't calibrate
+	    return;
+	Serial.println("CAL");
 	res = writeReg(i, CLCTRL_REG, 1);
 	if(res == 0)
-	    cal[i] = CAL_PROG;	
-    }    
+	    cal[i] = CAL_PROG;
+	// else
+	//     done++;
+	Serial.println(cal[i]);
+	delay(2000);
+    }
     while(done < 4){ // keep checking if calibration is done on all sensors
-	buffer = malloc(15);
+	buffer = malloc(50);
+
+	Serial.println("CAL2");
+	Serial.println(done);
 	int buf_ptr = 0;
 	
 	for(i=0; i<NUM_SENSORS; i++){
-	    char calstr[10] = "CAL", output[10], *errval;
-	    errval = malloc(3);
-	    
+	    Serial.println("CAL3");
+	    sts = malloc(10);
 	    curr_calsts = readReg(i, CALSTS_REG);
 	    if(curr_calsts == CAL_DONE){
 		done++;
 		cal[i] = CAL_DONE;
 	    }
-	    strcat(calstr, itoa(cal[i], errval, 10));
-	    strcpy(output, calstr);
+	    Serial.println("CAL3");
+	    retval = getVal(i, sts, 1);
 	    buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
-				" %s ", output);
-	    free(errval);
+				" %s ", sts);
+	    free(sts);
+	    
+	    Serial.println("CAL4");
+	    delay(2000);
 	}
 	
 	Serial.println(buffer);
 	Serial.flush();
 	free(buffer);
-	delay(100);
+	delay(2000);
     }
     for (i=0; i<NUM_SENSORS; i++){ // reset calibration
-	writeReg(i, CLCTRL_REG, 2);
+	Serial.println("RESET");
+	res = writeReg(i, CLCTRL_REG, 2); // TODO check if this succeeds
 	cal[i] = CAL_IDLE;
     }
 }
@@ -198,51 +256,33 @@ void setup(){
 int k=0;
 
 void loop(){
-    int i, buf_ptr = 0, data;    
-    char *buffer;
+    int i, buf_ptr = 0, data, retval;    
+    char *buffer, *output;
     
     buffer = malloc(50);
     
-    for(i=0; i<NUM_SENSORS; i++){
-	char errstr[10] = "ERR", *errval, output[10];
-	char statstr[10] = "STS";
-	errval = malloc(3);
+    if(k == CHK_DELAY && digitalRead(12) == HIGH) // Calibration check
+	calibrate();
+    else{
+	for(i=0; i<NUM_SENSORS; i++){
+	    output = malloc(10);
+
+	    retval = getVal(i, output, cal[i]);
+	    if(retval < 0 && k==CHK_DELAY) // Error
+		handleSensor(i);
 	
-	if(k == CHK_DELAY && digitalRead(12) == HIGH) // Calibration check
-	    calibrate();
-	if(status[i] == ON){
-	    data = readReg(i, O2AVG_REG);
-	    if(data < 0){ // Error
-		handleSensor(i);
-	    }
-	    else{
-		dtostrf(data, 4, 0, output);
-	    }
+	    buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
+				" %s ", output);
+	    free(output);
+	    delay(4);
 	}
-	else if(status[i] >= 0){
-	    strcat(statstr, itoa(status[i], errval, 10));
-	    strcpy(output, statstr);
-	    if(k==CHK_DELAY)
-		handleSensor(i);
-	}
-	else{	    
-	    strcat(errstr, itoa(status[i]*-1, errval, 10));
-	    strcpy(output, errstr);
-	    if(k==CHK_DELAY)
-		handleSensor(i);
-	}
-	buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
-			    " %s ", output);
-	free(errval);
-	delay(4);
     }
-    
     Serial.println(buffer);
     Serial.flush();
     free(buffer);
     
     k+=1;
-    k%=11;
+    k%=(CHK_DELAY+1);
     // delay(100);
 }
 
