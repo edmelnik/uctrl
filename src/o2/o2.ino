@@ -60,7 +60,7 @@ SoftwareSerial modbus(4, 5);
 
 // ModbusMaster node[NUM_SENSORS];
 
-ModbusMaster *node =malloc(sizeof(ModbusMaster)*4);
+ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
 
 // Status < 0 means there's an active error code in err[] for the sensor
 // Error == 0 means that there's sensor status value = valid
@@ -182,8 +182,7 @@ void setup(){
     for(i=0; i<NUM_SENSORS; i++){
     	SST_addr = i+1;
 	node[i] = *(new ModbusMaster);
-	node[i].begin(SST_addr, modbus);
-    
+	node[i].begin(SST_addr, modbus);    
     }
     
     // If sensor is idle, turn it on
