@@ -26,6 +26,7 @@
 #define O2AVG_REG  30001
 #define STATUS_REG 30004
 #define ERR_REG    30005
+#define CALSTS_REG 30018
 // Holding regs
 #define ONOFF_REG   40001
 #define CLCTRL_REG  40004 // Calibration control
@@ -121,15 +122,19 @@ int writeReg(int sensor, int reg, int value){
 }
 
 void handleSensor(int i){
-    int res;
+    int res, cal_res;
+    cal[i] = readReg(i, CALSTS_REG);
     status[i] = readReg(i, STATUS_REG);
-    if(status[i] == IDLE || status[i] == STANDBY){
+    
+    // Turn sensor on if: it's idle OR on standby and not being calibrated
+    if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){
 	res = writeReg(i, ONOFF_REG, 1);
 	if(res < 0)
 	    status[i] = res;
 	else
 	    status[i] = readReg(i, STATUS_REG);
     }
+    
 }
 
 void setup(){    
@@ -147,7 +152,7 @@ void setup(){
     
     // If sensor is idle, turn it on
     for(i=0; i<NUM_SENSORS; i++)
-	handSensor(i);
+	handleSensor(i);
 
     // At this point ideally all sensors are turned on.
     // Sensors that have an active error code and not turned on
