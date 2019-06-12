@@ -53,8 +53,6 @@ import sys
 import configparser
 import importlib
 
-# temp import, this should be done dynamically
-import stdout
 # Output values in config file
 STDOUT = 'stdout'
 XBEE   = 'zigbee'
