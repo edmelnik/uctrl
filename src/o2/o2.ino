@@ -35,6 +35,7 @@
 
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
+// Delay for periodic checks (status, calibration et cetera)
 const static unsigned int CHK_DELAY = 10;
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -205,8 +206,8 @@ void loop(){
     Serial.flush();
     free(buffer);
     
-    k+=1;
-    k%=11;
+    k += 1;
+    k %= (CHK_DELAY+1);
     // delay(100);
 }
 
