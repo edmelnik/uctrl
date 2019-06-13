@@ -1,15 +1,15 @@
 /*
 
-  TODO Better error checking and overall control flow
-  - Periodically monitor status and check expected O2 values
-  - O2 values could be modelled to make intelligent calibration decisions
-  TODO Format the output values in a similar manner to how the pressure is being formatted
-  - Might be possible to use the output function as a header file common to both
   TODO calibration routine
   TODO When to use STANDBY mode on sensors?
-  TODO Read multiple registers and parse the response buffer
-  - Select relevent values (see comment above func loop)
   TODO Combine o2 and pressure into a single grand PoC
+  DONE Read multiple registers and parse the response buffer
+  - Select relevent values (see comment above func loop)
+  DONE Format the output values in a similar manner to how the pressure is being formatted
+  - Might be possible to use the output function as a header file common to both
+  DONE Better error checking and overall control flow
+  - Periodically monitor status and check expected O2 values
+  - O2 values could be modelled to make intelligent calibration decisions
 
   Will the ~ PWM pins with this? Should any strange and unexpected errors occur in the near future, blame this
 */
