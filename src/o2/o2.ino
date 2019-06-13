@@ -36,7 +36,7 @@
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
-const static unsigned int CHK_DELAY = 10;
+const static unsigned int CHK_DELAY = 30;
 
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -65,12 +65,12 @@ SoftwareSerial modbus(4, 5);
 ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
 
 /*
- Status < 0 means there's an active error code in err[] for the sensor
- Error == 0 means that there's sensor status value = valid
+  Status < 0 means there's an active error code in err[] for the sensor
+  Error == 0 means that there's sensor status value = valid
 
- cal_mark tracks the calibration demands from the interrupt pins,
+  cal_mark tracks the calibration demands from the interrupt pins,
   while cal tracks the actual calibration state of the boards
- cal_mark[i] == 1 means that calibration is process for sensor i
+  cal_mark[i] == 1 means that calibration is process for sensor i
   this calibration could be DONE, PROG or IDLE.. cal[i] would hold
   that info
 */
@@ -137,11 +137,15 @@ void handleSensor(int i){
     cal[i] = readReg(i, CALSTS_REG); delay(1);
 
     if(cal_mark[i] == 1 && (cal[i] == CAL_IDLE || cal[i] == CAL_DONE)){ // Calibrate
+
 	res = writeReg(i, CLCTRL_REG, 1); delay(1);
 	if(res < 0)
 	    status[i] = res;
-	else
+	else{
 	    cal[i] = readReg(i, CALSTS_REG); delay(1);
+	    Serial.print("cal status: ");
+	    Serial.println(cal[i]);
+	}
     }
     else if(cal[i] == CAL_DONE){ // Reset
 	res = writeReg(i, CLCTRL_REG, 2); delay(1);
@@ -150,6 +154,7 @@ void handleSensor(int i){
 	else{
 	    cal[i] = readReg(i, CALSTS_REG); delay(1);
 	    cal_mark[i] = cal[i];
+	    Serial.println("reset cal");
 	}
     }
     else if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){ // Turn ON
@@ -163,8 +168,8 @@ void handleSensor(int i){
 
 /*
 
- Data, error, status, calibration output handler used by loop() and calibrate()
- Cal out is a boolean: 1 if called by calibration and only prints cal status (does not set data)
+  Data, error, status, calibration output handler used by loop() and calibrate()
+  Cal out is a boolean: 1 if called by calibration and only prints cal status (does not set data)
 
 */
 int getVal(int sensor, char *output, unsigned int cal_out=0){
@@ -232,45 +237,44 @@ int k=0;
 
 void loop(){
     int i, buf_ptr = 0, data, retval, handle_flag[] = {0,0,0,0};    
-    char *buffer, *output;
-    
-    buffer = malloc(50);
+    char *buffer, *output;    
     
     if(k == CHK_DELAY && digitalRead(12) == LOW){ // Calibration check (single cal for now)
 	cal_mark[0] = 1;
-	handleSensor(0);
+	handle_flag[0] = 1;
     }
-    else{
-	output = malloc(10);
 
-	for(i=0; i<NUM_SENSORS; i++){
-	    if(cal[i] == CAL_PROG && cal_mark[i] != 0){
-		retval = getVal(i, output, 1); // Calibration output
+    buffer = malloc(50);
+    for(i=0; i<NUM_SENSORS; i++){
+	output = malloc(10);
+	if(cal[i] == CAL_PROG){
+	    retval = getVal(i, output, 1); // Calibration output
+	    handle_flag[i] = 1;
+	}
+	else{
+	    retval = getVal(i, output, 0); // Data output
+	    if(retval < 0)
 		handle_flag[i] = 1;
-	    }
-	    else{
-		retval = getVal(i, output, 0); // Data output
-	    }
-	    if(retval < 0) // Error
-		handle_flag[i] = 1;
+	}
 	
-	    buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
-				" %s ", output);
-	    free(output);
-	    delay(4);
-	}	
-	Serial.println(buffer);
-	Serial.flush();
-	free(buffer);
+	buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
+			    " %s ", output);
+	free(output);
+	delay(4);
+    }	
+    Serial.println(buffer);
+    Serial.flush();
+    free(buffer);
 	
-	for(i=0; k == CHK_DELAY && i<NUM_SENSORS; i++)
-	    if(handle_flag[i])
-		handleSensor(i);
+    for(i=0; k == CHK_DELAY && i<NUM_SENSORS; i++){
+	if(handle_flag[i] == 1){
+	    handleSensor(i);
+	    delay(10);
+	}
     }
     
     k+=1;
-    k%=(CHK_DELAY+1);
-    // delay(100);
+    k%=(CHK_DELAY+1);    
 }
 
 
