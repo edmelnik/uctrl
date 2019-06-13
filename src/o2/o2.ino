@@ -36,7 +36,7 @@
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
-const static unsigned int CHK_DELAY = 30;
+const static unsigned int CHK_DELAY = 10;
 
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -133,32 +133,31 @@ int writeReg(int sensor, int reg, int value){
 
 void handleSensor(int i){
     int res, cal_res;
-    status[i] = readReg(i, STATUS_REG); delay(1);
-    cal[i] = readReg(i, CALSTS_REG); delay(1);
+    status[i] = readReg(i, STATUS_REG); delay(2);
+    cal[i] = readReg(i, CALSTS_REG); delay(2);
 
-    if(cal_mark[i] == 1 && (cal[i] == CAL_IDLE || cal[i] == CAL_DONE)){ // Calibrate
-
-	res = writeReg(i, CLCTRL_REG, 1); delay(1);
+    if(cal_mark[i] == 1 && cal[i] == CAL_IDLE){ // Calibrate
+	res = writeReg(i, CLCTRL_REG, 1); delay(2);
 	if(res < 0)
 	    status[i] = res;
 	else{
-	    cal[i] = readReg(i, CALSTS_REG); delay(1);
+	    cal[i] = readReg(i, CALSTS_REG); delay(2);
 	    Serial.print("cal status: ");
 	    Serial.println(cal[i]);
 	}
     }
     else if(cal[i] == CAL_DONE){ // Reset
-	res = writeReg(i, CLCTRL_REG, 2); delay(1);
+	res = writeReg(i, CLCTRL_REG, 2); delay(2);
 	if(res < 0)
 	    status[i] = res;
 	else{
-	    cal[i] = readReg(i, CALSTS_REG); delay(1);
+	    cal[i] = readReg(i, CALSTS_REG); delay(2);
 	    cal_mark[i] = cal[i];
 	    Serial.println("reset cal");
 	}
     }
     else if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){ // Turn ON
-	res = writeReg(i, ONOFF_REG, 1); delay(1);
+	res = writeReg(i, ONOFF_REG, 1); delay(2);
 	if(res < 0)
 	    status[i] = res;
 	else
@@ -181,7 +180,7 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
     
     if(cal_out > 0){
 	strcat(calstr, itoa(cal[sensor], errval, 10));
-	strcpy(cal_out, calstr);
+	strcpy(output, calstr);
 	retval = 1;
     }
     else if(status[sensor] == ON){
@@ -240,14 +239,14 @@ void loop(){
     char *buffer, *output;    
     
     if(k == CHK_DELAY && digitalRead(12) == LOW){ // Calibration check (single cal for now)
-	cal_mark[0] = 1;
-	handle_flag[0] = 1;
+	cal_mark[1] = 1;
+	handle_flag[1] = 1;
     }
 
     buffer = malloc(50);
     for(i=0; i<NUM_SENSORS; i++){
 	output = malloc(10);
-	if(cal[i] == CAL_PROG){
+	if(cal_mark[i] == 1){
 	    retval = getVal(i, output, 1); // Calibration output
 	    handle_flag[i] = 1;
 	}
