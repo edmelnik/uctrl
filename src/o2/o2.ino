@@ -50,19 +50,11 @@ const static int CAL_IDLE PROGMEM = 0;
 const static int CAL_PROG PROGMEM = 1;
 const static int CAL_DONE PROGMEM = 2;
 
-// SoftwareSerial modbus[NUM_SENSORS] = {
-//     SoftwareSerial(START_PIN, START_PIN+1),
-//     SoftwareSerial(START_PIN+2, START_PIN+3),
-//     SoftwareSerial(START_PIN+4, START_PIN+5),
-//     SoftwareSerial(START_PIN+6, START_PIN+7),
-// };
-
 SoftwareSerial modbus(4, 5);
 // SoftwareSerial *modbus = malloc(sizeof(SoftwareSerial)*4);
 
-// ModbusMaster node[NUM_SENSORS];
-
 ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
+// ModbusMaster node[NUM_SENSORS];
 
 /*
   Status < 0 means there's an active error code in err[] for the sensor
@@ -275,5 +267,4 @@ void loop(){
     k+=1;
     k%=(CHK_DELAY+1);    
 }
-
 
