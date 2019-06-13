@@ -64,7 +64,7 @@ ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
 
 // Status < 0 means there's an active error code in err[] for the sensor
 // Error == 0 means that there's sensor status value = valid
-int status[NUM_SENSORS], cal[NUM_SENSORS];
+int status[NUM_SENSORS], cal[NUM_SENSORS], cal_mark[NUM_SENSORS] = {0};
 
 /*
 
@@ -124,6 +124,14 @@ int writeReg(int sensor, int reg, int value){
 void handleSensor(int i){
     int res;
     status[i] = readReg(i, STATUS_REG);
+    cal[i] = readReg(i, CALSTS_REG);
+
+    if(cal_mark[i] == 1 && (cal[i] == CAL_IDLE || cal[i] == CAL_DONE)){ // calibrate
+	
+    }
+    else if(cal[i] == CAL_PROG){
+	
+    }
     if(status[i] == IDLE || status[i] == STANDBY){
 	res = writeReg(i, ONOFF_REG, 1);
 	if(res < 0)
@@ -261,13 +269,18 @@ void loop(){
     
     buffer = malloc(50);
     
-    if(k == CHK_DELAY && digitalRead(12) == HIGH) // Calibration check
-	calibrate();
+    if(k == CHK_DELAY && digitalRead(12) == HIGH){ // Calibration check
+	cal_mark[0] = 1;
+	handleSensor(0);
+    }
     else{
-	for(i=0; i<NUM_SENSORS; i++){
-	    output = malloc(10);
+	output = malloc(10);
 
-	    retval = getVal(i, output, cal[i]);
+	for(i=0; i<NUM_SENSORS; i++){
+	    if(cal[i] == CAL_PROG && cal_mark[i] != 0)
+		retval = getVal(i, output, 1);	    
+	    else
+		retval = getVal(i, output, 0);
 	    if(retval < 0 && k==CHK_DELAY) // Error
 		handleSensor(i);
 	
