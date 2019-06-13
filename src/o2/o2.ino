@@ -35,7 +35,9 @@
 
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
-const static unsigned int CHK_DELAY = 40;
+// Delay for periodic checks (status, calibration et cetera)
+const static unsigned int CHK_DELAY = 10;
+
 // System status
 const static int IDLE     PROGMEM = 0;
 const static int STARTUP  PROGMEM = 1;
@@ -122,7 +124,8 @@ int writeReg(int sensor, int reg, int value){
 }
 
 void handleSensor(int i){
-    int res;
+    int res, cal_res;
+    cal[i] = readReg(i, CALSTS_REG);
     status[i] = readReg(i, STATUS_REG);
     cal[i] = readReg(i, CALSTS_REG);
 
@@ -132,13 +135,16 @@ void handleSensor(int i){
     else if(cal[i] == CAL_PROG){
 	
     }
-    if(status[i] == IDLE || status[i] == STANDBY){
+    if(status[i] == IDLE || status[i] == STANDBY){    
+    // Turn sensor on if: it's idle OR on standby and not being calibrated
+    if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){
 	res = writeReg(i, ONOFF_REG, 1);
 	if(res < 0)
 	    status[i] = res;
 	else
 	    status[i] = readReg(i, STATUS_REG);
     }
+    
 }
 
 /*

@@ -51,11 +51,14 @@ import serial
 import time
 import sys
 import configparser
+import importlib
 
 # Output values in config file
 STDOUT = 'stdout'
 XBEE   = 'zigbee'
 INFLUX = 'influx'
+
+OUTPUT_FUNC = 'sendData'
 
 def connect(config):
     connected = False
@@ -78,7 +81,7 @@ def initData(device):
     while curr_time - epoch <= 2:
         getData(device)
         curr_time = time.time()
-        
+      
 def getData(device):
     vals = []
     try:
@@ -98,31 +101,29 @@ def handleTimeout(device):
     device.open()
     return device
 
-def printData(values):
-    output = ""
-    try:
-        for value in values:
-            output += value
-            output += " "
-        print(output)
-    except IndexError:
-        pass    
-
 def doOutput(config, values):
     output = config['output']
-    if int(output[XBEE]) == 1:
-        pass
-    if int(output[STDOUT]) == 1: # not elif for more than one output
-        printData(values)    
+    for module in output:
+        if output[module] == "1":
+            try:
+                return_status = getattr(sys.modules[module], OUTPUT_FUNC)(values)
+            except: # TODO Log
+                continue
         
 def main():
     config = configparser.ConfigParser()
-    config.read("config")
+    config.read("config")    
     device = connect(config)
+    
+    for output_option in config['output']:
+        try:
+            importlib.import_module(output_option)
+        except ModuleNotFoundError:
+            # TODO Log
+            continue    
     initData(device)
     while True:
         config.read("config") # Read config for changes
-        # output = readOutputConfig(config)
         values = getData(device)
         if len(values) <= 1: # only got the currtime, most likely timeout
             # device = handleTimeout(device)
