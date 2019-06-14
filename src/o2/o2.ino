@@ -36,7 +36,7 @@
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
-const static unsigned int CHK_DELAY = 5;
+const static unsigned int CHK_DELAY = 30;
 
 // System status
 const static int IDLE     PROGMEM = 0;
