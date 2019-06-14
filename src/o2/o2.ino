@@ -36,7 +36,7 @@
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
-const static unsigned int CHK_DELAY = 10;
+const static unsigned int CHK_DELAY = 5;
 
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -125,29 +125,27 @@ int writeReg(int sensor, int reg, int value){
 
 void handleSensor(int i){
     int res, cal_res;
-    status[i] = readReg(i, STATUS_REG); delay(2);
-    cal[i] = readReg(i, CALSTS_REG); delay(2);
-
+    status[i] = readReg(i, STATUS_REG); delay(4);
+    cal[i] = readReg(i, CALSTS_REG); delay(4);
     if(cal_mark[i] == 1 && cal[i] == CAL_IDLE){ // Calibrate
-	res = writeReg(i, CLCTRL_REG, 1); delay(2);
+	res = writeReg(i, CLCTRL_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
-	else{
-	    cal[i] = readReg(i, CALSTS_REG); delay(2);
-	    Serial.println(cal[i]);
-	}
+	else
+	    cal[i] = readReg(i, CALSTS_REG); delay(4);
     }
     else if(cal[i] == CAL_DONE){ // Reset
-	res = writeReg(i, CLCTRL_REG, 2); delay(2);
+	res = writeReg(i, CLCTRL_REG, 2); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else{
-	    cal[i] = readReg(i, CALSTS_REG); delay(2);
-	    cal_mark[i] = cal[i];
+	    cal[i] = readReg(i, CALSTS_REG); delay(4);
+	    // cal_mark[i] = cal[i];
+	    cal_mark[i] = 0;
 	}
     }
-    else if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){ // Turn ON
-	res = writeReg(i, ONOFF_REG, 1); delay(2);
+    else if((status[i] == IDLE || status[i] == STANDBY) && cal_mark[i] == 0){ // Turn ON
+	res = writeReg(i, ONOFF_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else
@@ -166,31 +164,33 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
     char o2_str[10], errstr[10] = "ERR", *errval, statstr[10] = "STS";
     char calstr[10] = "CAL";
        
-    errval = malloc(3);
+    errval = malloc(5);
     
-    if(cal_out > 0){
+    if(cal_mark[sensor] > 0){          // Get calibration status
 	strcat(calstr, itoa(cal[sensor], errval, 10));
 	strcpy(output, calstr);
 	retval = 1;
     }
-    else if(status[sensor] == ON){
+    else if(status[sensor] == ON){    // Get O2 data
 	data = readReg(sensor, O2AVG_REG);
-	if(data < 0){ // Error
+	if(data < 0){                 // Failed to get data, output ERR
+	    strcat(errstr, itoa(data*-1, errval, 10));
+	    strcpy(output, errstr);	    
 	    retval = -1;
 	}
-	else{
+	else{                         // Got data
 	    dtostrf(data, 4, 0, o2_str);
 	    strcpy(output, o2_str);
 	    retval = 1;
 	}
     }
     else{
-	if(status[sensor] >= 0){
+	if(status[sensor] >= 0){     // Status is not ON
 	    strcat(statstr, itoa(status[sensor], errval, 10));
 	    strcpy(output, statstr);
 	    retval = -2;
 	}
-	else{	    
+	else{                       // Error status
 	    strcat(errstr, itoa(status[sensor]*-1, errval, 10));
 	    strcpy(output, errstr);
 	    retval = -3;
@@ -203,7 +203,8 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
 void setup(){    
     int i, curr_pin, SST_addr;    
     Serial.begin(BAUD); // To USB output
-    modbus.begin(BAUD);
+    modbus.begin(BAUD); // To RS485 bus
+    
     // Actual sensor addresses are indexed by 1, but
     // once sensor addresses are configured in node[], they should indexed by 0
     for(i=0; i<NUM_SENSORS; i++){
@@ -230,12 +231,8 @@ void loop(){
 
     buffer = malloc(50);
     
-    if(k == CHK_DELAY && digitalRead(12) == LOW){ // Calibration check (single cal for now)
-	cal_mark[1] = 1;
-	handle_flag[1] = 1;
-    }
     for(i=0; i<NUM_SENSORS; i++){
-	output = malloc(10);
+	output = malloc(20);
 	if(cal_mark[i] == 1){
 	    retval = getVal(i, output, 1); // Calibration output
 	    handle_flag[i] = 1;
@@ -254,7 +251,11 @@ void loop(){
     Serial.println(buffer);
     Serial.flush();
     free(buffer);
-	
+    
+    if(k==CHK_DELAY && digitalRead(12)==LOW && cal_mark[1]==0){
+	cal_mark[1] = 1;
+	handle_flag[1] = 1;
+    }	
     for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++){
 	if(handle_flag[i] == 1){
 	    handleSensor(i);
