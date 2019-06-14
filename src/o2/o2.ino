@@ -61,10 +61,10 @@ ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
   Error == 0 means that there's sensor status value = valid
 
   cal_mark tracks the calibration demands from the interrupt pins,
-  while cal tracks the actual calibration state of the boards
+    while cal tracks the actual calibration state of the boards
   cal_mark[i] == 1 means that calibration is process for sensor i
   this calibration could be DONE, PROG or IDLE.. cal[i] would hold
-  that info
+    that info
 */
 int status[NUM_SENSORS], cal[NUM_SENSORS], cal_mark[NUM_SENSORS] = {0};
 
@@ -134,7 +134,6 @@ void handleSensor(int i){
 	    status[i] = res;
 	else{
 	    cal[i] = readReg(i, CALSTS_REG); delay(2);
-	    Serial.print("cal status: ");
 	    Serial.println(cal[i]);
 	}
     }
@@ -145,7 +144,6 @@ void handleSensor(int i){
 	else{
 	    cal[i] = readReg(i, CALSTS_REG); delay(2);
 	    cal_mark[i] = cal[i];
-	    Serial.println("reset cal");
 	}
     }
     else if((status[i] == IDLE || status[i] == STANDBY) && cal[i] != CAL_PROG){ // Turn ON
@@ -229,13 +227,13 @@ int k=0;
 void loop(){
     int i, buf_ptr = 0, data, retval, handle_flag[] = {0,0,0,0};    
     char *buffer, *output;    
+
+    buffer = malloc(50);
     
     if(k == CHK_DELAY && digitalRead(12) == LOW){ // Calibration check (single cal for now)
 	cal_mark[1] = 1;
 	handle_flag[1] = 1;
     }
-
-    buffer = malloc(50);
     for(i=0; i<NUM_SENSORS; i++){
 	output = malloc(10);
 	if(cal_mark[i] == 1){
@@ -252,12 +250,12 @@ void loop(){
 			    " %s ", output);
 	free(output);
 	delay(4);
-    }	
+    }
     Serial.println(buffer);
     Serial.flush();
     free(buffer);
 	
-    for(i=0; k == CHK_DELAY && i<NUM_SENSORS; i++){
+    for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++){
 	if(handle_flag[i] == 1){
 	    handleSensor(i);
 	    delay(10);
