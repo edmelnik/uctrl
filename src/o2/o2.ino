@@ -208,8 +208,8 @@ int handleCommands(){ // only handle cal for now
     int cmd = 0, count = 0, i;
     if(Serial.available() > 0){
 	while(cmd!=10 && count <= 3){ // 10 is line terminator for echo input
-	    cmd = Serial.read();
-	    if(cmd == 49)
+	    cmd = Serial.read(); // read a single byte from input buffer
+	    if(cmd == 49) // ascii "1"
 		cal_mark[count++] = 1;
 	    else
 		count++;
@@ -281,7 +281,6 @@ void loop(){
     }
     
     for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++){
-	// cal_mark[i] == 1 ? handle_flag[i] = 1 : handle_flag[i] = handle_flag[i];
 	if(handle_flag[i] == 1){
 	    handleSensor(i);
 	    delay(10);
