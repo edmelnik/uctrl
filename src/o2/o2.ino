@@ -253,7 +253,7 @@ void loop(){
     
     for(i=0; i<NUM_SENSORS; i++){
 	output = malloc(20);
-	if(cal_mark[i] == 1){
+	if(cal_mark[i] == 1 || cal[i] != CAL_IDLE){
 	    retval = getVal(i, output, 1); // Calibration output
 	    handle_flag[i] = 1;
 	}
