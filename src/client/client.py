@@ -126,7 +126,7 @@ def main():
         config.read("config") # Read config for changes
         values = getData(device)
         if len(values) <= 1: # only got the currtime, most likely timeout
-            # device = handleTimeout(device)
+            device = handleTimeout(device)
             pass
         else:
             doOutput(config, values)
@@ -135,8 +135,8 @@ def main():
 while True:
     try:
         main()
-    except KeyboardInterrupt:
-        sys.exit()
+    # except KeyboardInterrupt:
+    #     sys.exit()
     except serial.SerialException:
         continue
     # except:

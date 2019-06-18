@@ -128,6 +128,7 @@ void handleSensor(int i){
     status[i] = readReg(i, STATUS_REG); delay(4);
     cal[i] = readReg(i, CALSTS_REG); delay(4);
     if(cal_mark[i] == 1 && cal[i] == CAL_IDLE){ // Calibrate
+	Serial.println("CAL1");
 	res = writeReg(i, CLCTRL_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
@@ -135,16 +136,19 @@ void handleSensor(int i){
 	    cal[i] = readReg(i, CALSTS_REG); delay(4);
     }
     else if(cal[i] == CAL_DONE){ // Reset
+	Serial.println("CAL2");
 	res = writeReg(i, CLCTRL_REG, 2); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else{
+	    Serial.println("CAL3");
 	    cal[i] = readReg(i, CALSTS_REG); delay(4);
 	    // cal_mark[i] = cal[i];
 	    cal_mark[i] = 0;
 	}
     }
     else if((status[i] == IDLE || status[i] == STANDBY) && cal_mark[i] == 0){ // Turn ON
+	Serial.println("CAL4");
 	res = writeReg(i, ONOFF_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
@@ -200,8 +204,45 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
     return retval;
 }
 
+int getCommand(char *output){
+    char *cmd_buf;
+    int bytes_read;
+    cmd_buf = malloc(9);
+    Serial.flush();
+    delay(100);
+    bytes_read = Serial.readBytes(cmd_buf, 8);
+    if(bytes_read < 8)
+	return -1;
+    strcpy(output, cmd_buf);
+    free(cmd_buf);
+    return 1;
+}
+
+int handleCommands(){
+    Serial.println("handling commands");
+    char *input;
+    int i, ret;
+    input = malloc(9);
+    ret = getCommand(input);
+    if(ret < 0)
+	return -1;
+    Serial.print(input);
+    Serial.flush();
+    for(i=0; i<4; i++){ // Handle ON/OFF commands
+	
+    }
+    for(i=4; i<8; i++){ // Handle CAL commands	
+	if(strcmp(input[i], "1") == 0)
+	    cal_mark[i%4] = 1;
+    }
+    free(input);
+    return 1;
+}
+
 void setup(){    
-    int i, curr_pin, SST_addr;    
+    int i, curr_pin, SST_addr;
+    
+    Serial.setTimeout(2000);
     Serial.begin(BAUD); // To USB output
     modbus.begin(BAUD); // To RS485 bus
     
@@ -252,11 +293,16 @@ void loop(){
     Serial.flush();
     free(buffer);
     
-    if(k==CHK_DELAY && digitalRead(12)==LOW && cal_mark[1]==0){
-	cal_mark[1] = 1;
-	handle_flag[1] = 1;
-    }	
+    if(k==CHK_DELAY && digitalRead(12)==LOW){	
+	handleCommands();
+	for(i=0; i< NUM_SENSORS; i++)
+	    if(cal_mark[i] == 1)
+		handle_flag[i] = 1;
+	
+    }
+    
     for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++){
+	// cal_mark[i] == 1 ? handle_flag[i] = 1 : handle_flag[i] = handle_flag[i];
 	if(handle_flag[i] == 1){
 	    handleSensor(i);
 	    delay(10);
@@ -264,6 +310,6 @@ void loop(){
     }
     
     k+=1;
-    k%=(CHK_DELAY+1);    
+    k%=(CHK_DELAY+1);
 }
 
