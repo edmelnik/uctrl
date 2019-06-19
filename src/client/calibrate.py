@@ -1,3 +1,11 @@
+'''
+Continuously reads calibrate.conf and sends calibration and power ON/OFF codes to O2 sensors when activated
+
+Default values for calibration and power ensure that in the event of false activation
+- Default code for calibration is 0000 (don't calibrate anything by default)
+- Default code for power is 1111 (don't power off anything by default)
+
+'''
 wp.wiringPiSetupSys()                                                           
 wp.pinMode(PIN, 1)                                                              
 wp.digitalWrite(PIN, HIGH)                                                      

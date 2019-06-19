@@ -54,12 +54,8 @@ import configparser
 import importlib
 
 # Output values in config file
-STDOUT = 'stdout'
-XBEE   = 'zigbee'
-INFLUX = 'influx'
-
 OUTPUT_FUNC = 'sendData'
-
+CLIENT_CONF = 'client.conf'
 def connect(config):
     connected = False
     curr_dev = 0 # ttyACM* dev number
@@ -112,7 +108,7 @@ def doOutput(config, values):
         
 def main():
     config = configparser.ConfigParser()
-    config.read("config")    
+    config.read(CLIENT_CONF)    
     device = connect(config)
     
     for output_option in config['output']:
@@ -123,7 +119,7 @@ def main():
             continue    
     initData(device)
     while True:
-        config.read("config") # Read config for changes
+        config.read(CLIENT_CONF) # Read config for changes
         values = getData(device)
         if len(values) <= 1: # only got the currtime, most likely timeout
             device = handleTimeout(device)
