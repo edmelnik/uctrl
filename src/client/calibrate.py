@@ -71,3 +71,5 @@ def main():
         k%=(CHK_DELAY+1)
         time.sleep(2)
         
+if __name__ == '__main__':
+    main()
