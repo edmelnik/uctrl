@@ -1,6 +1,7 @@
 /*
 
   TODO calibration routine
+    TODO Solve problem in note (1)
   TODO When to use STANDBY mode on sensors?
   TODO Combine o2 and pressure into a single grand PoC
   DONE Read multiple registers and parse the response buffer
@@ -12,6 +13,10 @@
   - O2 values could be modelled to make intelligent calibration decisions
 
   Will the ~ PWM pins with this? Should any strange and unexpected errors occur in the near future, blame this
+
+NOTES
+1. The input serial buffer does not seem to be cleared after the read, which is probably the first command works as expected while the others are the same as the first command. 
+  - Worth trying serial.end at the end of handleCommands()
 */
 
 #include <ModbusMaster.h>
@@ -44,6 +49,8 @@ const static int STARTUP  PROGMEM = 1;
 const static int ON       PROGMEM = 2;
 const static int SHUTDOWN PROGMEM = 3;
 const static int STANDBY  PROGMEM = 4;
+
+
 
 // Calibration status codes
 const static int CAL_IDLE PROGMEM = 0;
@@ -128,7 +135,6 @@ void handleSensor(int i){
     status[i] = readReg(i, STATUS_REG); delay(4);
     cal[i] = readReg(i, CALSTS_REG); delay(4);
     if(cal_mark[i] == 1 && cal[i] == CAL_IDLE){ // Calibrate
-	// Serial.println("CAL1");
 	res = writeReg(i, CLCTRL_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
@@ -136,19 +142,16 @@ void handleSensor(int i){
 	    cal[i] = readReg(i, CALSTS_REG); delay(4);
     }
     else if(cal[i] == CAL_DONE){ // Reset
-	// Serial.println("CAL2");
 	res = writeReg(i, CLCTRL_REG, 2); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else{
-	    // Serial.println("CAL3");
 	    cal[i] = readReg(i, CALSTS_REG); delay(4);
 	    // cal_mark[i] = cal[i];
 	    cal_mark[i] = 0;
 	}
     }
     else if((status[i] == IDLE || status[i] == STANDBY) && cal_mark[i] == 0){ // Turn ON
-	// Serial.println("CAL4");
 	res = writeReg(i, ONOFF_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
@@ -215,6 +218,7 @@ int handleCommands(){ // only handle cal for now
 		count++;
 	}
     }
+    Serial.end();
     return 1;
 }
 
@@ -269,11 +273,11 @@ void loop(){
 	delay(4);
     }
     Serial.println(buffer);
-    Serial.flush();
     free(buffer);
     
-    if(k==CHK_DELAY && digitalRead(12)==LOW){	
+    if(k==CHK_DELAY && digitalRead(12)==LOW){
 	handleCommands();
+	Serial.begin(BAUD);
 	for(i=0; i< NUM_SENSORS; i++)
 	    if(cal_mark[i] == 1)
 		handle_flag[i] = 1;
@@ -289,5 +293,6 @@ void loop(){
     
     k+=1;
     k%=(CHK_DELAY+1);
+    Serial.flush();
 }
 
