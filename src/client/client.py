@@ -26,9 +26,10 @@ TODO Add logging of errors and other messages (TIMEOUT, connecting to device on 
 TODO use logic level converter to output on serial pins as well
 TODO Add reset condition if 3 or more timeouts detected
   - Number of timeouts to reset could be a config option
-TODO Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
+DONE Find the reason for periodic timeouts - for some reason communication seems to stop and the port needs to be restarted in order for it to work
  - This seems to be related with the number of devices the microcontroller is serving
-TODO Inspect why error numbers ERR* seem to periodically disappear (itoa problem?)
+ - Solved: this was due to buffer overflows on the microcontroller
+DONE Inspect why error numbers ERR* seem to periodically disappear (itoa problem?)
 DONE A better way of reading what to do with the collected datapoints might be to have a config file in the same directory as this script: the config can allow various operations
   - print data to STDOUT
   - push data to zigbee
