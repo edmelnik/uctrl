@@ -11,30 +11,25 @@ Device value in the calibrate.conf should be written by the client. This seems a
 
 import wiringpi as wp
 import time
-import subprocess
 import configparser
+import serial
 
 HIGH = 1
 LOW = 0
 CONF = "calibrate.conf"
-CHK_DELAY = 100 # num cycles to wait for checking changes in addr, signal_length, pin
-
-# From conf
-# SIGNAL_LENGTH = 4 # how long to hold the GPIO pin high
-# PIN = 7
-# DEVICE = "/dev/ttyACM0"
+CHK_DELAY = 50 # num cycles to wait for checking changes in addr, signal_length, pin
 
 def power(code):
     pass
 
 def calibrate(code, device, pin, signal_length):
-    args = "echo " + code + " > " + device
+    dev = serial.Serial(device)
     print("Sending calibration code " + code + " to address " + device) # TODO log
     wp.digitalWrite(pin, LOW)
     epoch = time.time()
     curr_time = time.time()
     while curr_time - epoch <= signal_length:
-        subprocess.Popen(args, shell=True)
+        dev.write(bytes(code, encoding='utf-8'))
         time.sleep(2)
         curr_time = time.time()
     wp.digitalWrite(pin, HIGH)
@@ -71,7 +66,7 @@ def main():
             
         k+=1
         k%=(CHK_DELAY+1)
-        time.sleep(2)
+        time.sleep(1)
         
 # TODO Add try/except block here
 while True:

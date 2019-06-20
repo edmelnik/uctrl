@@ -54,9 +54,11 @@ import sys
 import configparser
 import importlib
 
+BAUD = 9600
 # Output values in config file
 OUTPUT_FUNC = 'sendData'
 CLIENT_CONF = 'client.conf'
+
 def connect(config):
     connected = False
     curr_dev = 0 # ttyACM* dev number
@@ -65,7 +67,7 @@ def connect(config):
     while not connected:
         curr_dev_addr = dev_addr + str(curr_dev)
         try:
-            device = serial.Serial(curr_dev_addr, 9600, timeout=2)
+            device = serial.Serial(curr_dev_addr, BAUD, timeout=2)
             connected = True
         except (serial.SerialException, FileNotFoundError) as e:
             curr_dev += 1

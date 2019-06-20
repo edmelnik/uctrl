@@ -41,7 +41,7 @@ NOTES
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
-const static unsigned int CHK_DELAY = 30;
+const static unsigned int CHK_DELAY = 20;
 
 // System status
 const static int IDLE     PROGMEM = 0;
@@ -146,11 +146,13 @@ void handleSensor(int i){
 	if(res < 0)
 	    status[i] = res;
 	else{
-	    cal[i] = readReg(i, CALSTS_REG); delay(4);
-	    // cal_mark[i] = cal[i];
-	    cal_mark[i] = 0;
+	    cal[i] = readReg(i, CALSTS_REG); delay(10);	    
+	    cal_mark[i] = cal[i];
+	    // cal_mark[i] = 0;
 	}
     }
+    else if(cal[i] == CAL_IDLE && cal_mark[i] == 2)
+	cal_mark[i] = 0;
     else if((status[i] == IDLE || status[i] == STANDBY) && cal_mark[i] == 0){ // Turn ON
 	res = writeReg(i, ONOFF_REG, 1); delay(4);
 	if(res < 0)
@@ -208,17 +210,14 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
 }
 
 int handleCommands(){ // only handle cal for now
-    int cmd = 0, count = 0, i;
-    if(Serial.available() > 0){
-	while(cmd!=10 && count <= 3){ // 10 is line terminator for echo input
-	    cmd = Serial.read(); // read a single byte from input buffer
-	    if(cmd == 49) // ascii "1"
-		cal_mark[count++] = 1;
-	    else
-		count++;
-	}
+    int cmd = 0, count = 0, i, garbage;
+    for(i=0; i<4 && Serial.available()>0; i++){
+	cmd = Serial.read();
+	if(cmd == 49)
+	    cal_mark[i] = 1;	    
     }
-    Serial.end();
+    while(Serial.available() > 0 && count++<30)
+    	garbage = Serial.read();
     return 1;
 }
 
@@ -234,7 +233,7 @@ void setup(){
     for(i=0; i<NUM_SENSORS; i++){
     	SST_addr = i+1;
 	node[i] = *(new ModbusMaster);
-	node[i].begin(SST_addr, modbus);    
+	node[i].begin(SST_addr, modbus);
     }
     
     // If sensor is idle, turn it on
@@ -255,9 +254,9 @@ void loop(){
 
     buffer = malloc(50);
     
-    for(i=0; i<NUM_SENSORS; i++){
+    for(i=0; i<NUM_SENSORS; i++){	
 	output = malloc(20);
-	if(cal_mark[i] == 1 || cal[i] != CAL_IDLE){
+	if(cal_mark[i] != 0){ // || cal[i] != CAL_IDLE){
 	    retval = getVal(i, output, 1); // Calibration output
 	    handle_flag[i] = 1;
 	}
@@ -277,22 +276,17 @@ void loop(){
     
     if(k==CHK_DELAY && digitalRead(12)==LOW){
 	handleCommands();
-	Serial.begin(BAUD);
 	for(i=0; i< NUM_SENSORS; i++)
 	    if(cal_mark[i] == 1)
-		handle_flag[i] = 1;
-	
+		handle_flag[i] = 1;	
     }
     
-    for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++){
-	if(handle_flag[i] == 1){
+    for(i=0; k==CHK_DELAY && i<NUM_SENSORS; i++)
+	if(handle_flag[i] == 1)
 	    handleSensor(i);
-	    delay(10);
-	}
-    }
     
     k+=1;
     k%=(CHK_DELAY+1);
-    Serial.flush();
+    // Serial.flush();
 }
 
