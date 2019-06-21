@@ -63,7 +63,7 @@ def buildJson(values):
             parsed_vals.append(float(float(values[i])/100))
         else:
             parsed_vals.append(float(0))
-                        
+            
     json_body = [
         {
             "measurement": PROJECT_NAME,
