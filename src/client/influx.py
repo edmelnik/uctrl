@@ -60,7 +60,7 @@ def buildJson(values):
     parsed_vals = []
     for i in range(1, len(values)):
         if values[i].isdigit():
-            parsed_vals.append(float(float(val)/100))
+            parsed_vals.append(float(float(values[i])/100))
         else:
             parsed_vals.append(float(0))
                         
