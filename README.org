@@ -19,3 +19,5 @@
   - Check for a pyserial feature that returns something on tiemout
 ** TODO FEATURE MINOR Try/catch blocks for calibrate
 - Calibrate needs to do its thing forever: catch errors and continue
+** TODO FEATURE MEDIUM TODO String construction in getVal() should be optimized
+- Base strings should be global and in progmem, these strings should be copied as needed in getVal
