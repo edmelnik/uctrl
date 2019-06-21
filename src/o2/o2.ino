@@ -1,9 +1,10 @@
 /*
-
-  TODO calibration routine
-    TODO Solve problem in note (1)
+  TODO String construction in getVal() should be optimized
+    - Base strings should be global and in progmem, these strings should be copied as needed in getVal
   TODO When to use STANDBY mode on sensors?
   TODO Combine o2 and pressure into a single grand PoC
+  DONE calibration routine
+    DONE Solve problem in note (1)
   DONE Read multiple registers and parse the response buffer
   - Select relevent values (see comment above func loop)
   DONE Format the output values in a similar manner to how the pressure is being formatted
@@ -50,12 +51,16 @@ const static int ON       PROGMEM = 2;
 const static int SHUTDOWN PROGMEM = 3;
 const static int STANDBY  PROGMEM = 4;
 
-
-
 // Calibration status codes
 const static int CAL_IDLE PROGMEM = 0;
 const static int CAL_PROG PROGMEM = 1;
 const static int CAL_DONE PROGMEM = 2;
+
+// Flag codes
+const static int FLAG_NONE PROGMEM = 0;
+const static int FLAG_CAL  PROGMEM = 1;
+const static int FLAG_DONE PROGMEM = 2;
+const static int FLAG_OFF  PROGMEM = 3;
 
 SoftwareSerial modbus(4, 5);
 // SoftwareSerial *modbus = malloc(sizeof(SoftwareSerial)*4);
@@ -67,13 +72,13 @@ ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
   Status < 0 means there's an active error code in err[] for the sensor
   Error == 0 means that there's sensor status value = valid
 
-  cal_mark tracks the calibration demands from the interrupt pins,
+  flag[] tracks the calibration demands from the interrupt pins,
     while cal tracks the actual calibration state of the boards
-  cal_mark[i] == 1 means that calibration is process for sensor i
+  flag[i] == FLAG_CAL means that calibration is in process for sensor i
   this calibration could be DONE, PROG or IDLE.. cal[i] would hold
     that info
 */
-int status[NUM_SENSORS], cal[NUM_SENSORS], cal_mark[NUM_SENSORS] = {0};
+int status[NUM_SENSORS], cal[NUM_SENSORS], flag[NUM_SENSORS] = {FLAG_NONE};
 
 /*
 
@@ -134,26 +139,34 @@ void handleSensor(int i){
     int res, cal_res;
     status[i] = readReg(i, STATUS_REG); delay(4);
     cal[i] = readReg(i, CALSTS_REG); delay(4);
-    if(cal_mark[i] == 1 && cal[i] == CAL_IDLE){ // Calibrate
+    
+    if(flag[i] == FLAG_CAL && cal[i] == CAL_IDLE){ // Calibrate
 	res = writeReg(i, CLCTRL_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else
 	    cal[i] = readReg(i, CALSTS_REG); delay(4);
     }
-    else if(cal[i] == CAL_DONE){ // Reset
+    else if(cal[i] == CAL_DONE){ // Reset sensor
 	res = writeReg(i, CLCTRL_REG, 2); delay(4);
 	if(res < 0)
 	    status[i] = res;
 	else{
 	    cal[i] = readReg(i, CALSTS_REG); delay(10);	    
-	    cal_mark[i] = cal[i];
-	    // cal_mark[i] = 0;
+	    flag[i] = cal[i];
 	}
     }
-    else if(cal[i] == CAL_IDLE && cal_mark[i] == 2)
-	cal_mark[i] = 0;
-    else if((status[i] == IDLE || status[i] == STANDBY) && cal_mark[i] == 0){ // Turn ON
+    else if(cal[i] == CAL_IDLE && flag[i] == FLAG_DONE){ // Reset flag
+	flag[i] = 0;
+    }
+    else if(flag[i] == FLAG_OFF){ // Manual Shutdown
+	res = writeReg(i, ONOFF_REG, 0); delay(4);
+	if(res < 0)
+	    status[i] = res;
+	else
+	    status[i] = readReg(i, STATUS_REG);
+    }
+    else if((status[i] == IDLE || status[i] == STANDBY) && flag[i] == FLAG_NONE){ // Turn ON
 	res = writeReg(i, ONOFF_REG, 1); delay(4);
 	if(res < 0)
 	    status[i] = res;
@@ -175,7 +188,7 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
        
     errval = malloc(5);
     
-    if(cal_mark[sensor] > 0){          // Get calibration status
+    if(flag[sensor]>FLAG_NONE && flag[sensor]<FLAG_OFF ){ // Get calibration status
 	strcat(calstr, itoa(cal[sensor], errval, 10));
 	strcpy(output, calstr);
 	retval = 1;
@@ -194,10 +207,14 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
 	}
     }
     else{
-	if(status[sensor] >= 0){     // Status is not ON
+	if(status[sensor] >= 0){     // Status is not ON - get status
 	    strcat(statstr, itoa(status[sensor], errval, 10));
 	    strcpy(output, statstr);
-	    retval = -2;
+	    // Return failure only if sensor was not manually off
+	    if(flag[sensor] == FLAG_OFF)
+		retval = 1;
+	    else
+		retval = -2;
 	}
 	else{                       // Error status
 	    strcat(errstr, itoa(status[sensor]*-1, errval, 10));
@@ -209,12 +226,20 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
     return retval;
 }
 
-int handleCommands(){ // only handle cal for now
+int handleCommands(){
     int cmd = 0, count = 0, i, garbage;
-    for(i=0; i<4 && Serial.available()>0; i++){
+    for(i=0; i<8 && Serial.available()>0; i++){
 	cmd = Serial.read();
-	if(cmd == 49)
-	    cal_mark[i] = 1;	    
+	if(i<=3){ // Handle power commands
+	    if(cmd == 48)
+		flag[i] = FLAG_OFF;
+	    else if(cmd == 49)
+		flag[i] = FLAG_NONE;
+	}
+	else if(i>3){ // Handle calibration commands
+	    if(cmd == 49 && flag[i%4] != FLAG_OFF)
+		flag[i%4] = FLAG_CAL;
+	}
     }
     while(Serial.available() > 0 && count++<30)
     	garbage = Serial.read();
@@ -254,14 +279,18 @@ void loop(){
 
     buffer = malloc(50);
     
-    for(i=0; i<NUM_SENSORS; i++){	
+    for(i=0; i<NUM_SENSORS; i++){
 	output = malloc(20);
-	if(cal_mark[i] != 0){ // || cal[i] != CAL_IDLE){
-	    retval = getVal(i, output, 1); // Calibration output
+	if(flag[i] == FLAG_OFF && status[i] == ON){ // Flagged for manual shutdown
+	    retval = getVal(i, output, 0);
+	    handle_flag[i] = 1;
+	}
+	if(flag[i] > FLAG_NONE && flag[i] < FLAG_OFF){ // Flagged for calibration
+	    retval = getVal(i, output, 1);
 	    handle_flag[i] = 1;
 	}
 	else{
-	    retval = getVal(i, output, 0); // Data output
+	    retval = getVal(i, output, 0); // Not flagged; get data
 	    if(retval < 0)
 		handle_flag[i] = 1;
 	}
@@ -277,7 +306,7 @@ void loop(){
     if(k==CHK_DELAY && digitalRead(12)==LOW){
 	handleCommands();
 	for(i=0; i< NUM_SENSORS; i++)
-	    if(cal_mark[i] == 1)
+	    if(flag[i] == FLAG_CAL || flag[i] == FLAG_OFF)
 		handle_flag[i] = 1;	
     }
     
@@ -287,6 +316,5 @@ void loop(){
     
     k+=1;
     k%=(CHK_DELAY+1);
-    // Serial.flush();
 }
 

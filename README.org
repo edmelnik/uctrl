@@ -19,7 +19,10 @@
   - Check for a pyserial feature that returns something on tiemout
 ** TODO FEATURE MINOR Try/catch blocks for calibrate
 - Calibrate needs to do its thing forever: catch errors and continue
+** TODO FEATURE MEDIUM TODO String construction in getVal() should be optimized
+- Base strings should be global and in progmem, these strings should be copied as needed in getVal
 ** TODO FEATURE MAJOR Nonblocking module IO for client
 - Currently the client blocks until each module output is completed - bad
 - Solution: run each module in a seperate thread
 ** TODO BUGFIX MINOR Non-numeric values in influx.py module should not be 0 but undefined
+
