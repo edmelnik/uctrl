@@ -58,12 +58,12 @@ nanlist.append("CAL")
 
 def buildJson(values):
     parsed_vals = []
-    for val in values:
-        if val.isdigit():
+    for i in range(1, len(values)):
+        if values[i].isdigit():
             parsed_vals.append(float(float(val)/100))
         else:
             parsed_vals.append(float(0))
-            
+                        
     json_body = [
         {
             "measurement": PROJECT_NAME,
