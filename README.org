@@ -2,11 +2,13 @@
 * Atmel microcontroller tests
 - Multiple sensor data acquisition using TWI
 * TODOs
-** TODO BUGFIX MAJOR Calibration routine falters when a single sensor is calibrated
+** DONE BUGFIX MAJOR Calibration routine falters when a single sensor is calibrated
 - This is bad because if unexpected sensors are calibrated, they will not necessarily have the pumps in the correct direction 
 - Two possible explanations
   - Calibration =mark= not being reset in microcontroller O2 code
   - Microcontroller is not clearing the serial recieve buffer, leading to stale data being read again 
+*** Closing note
+- Stale data in microcontroller serial rx buffer is being purged in =handleCommands()=
 ** TODO FEATURE MEDIUM Manual powering ON/OFF for o2 sensors
 - This is not supported in o2: add a flag (perhaps by just generalizing =cal_mark=) that indicates that a sensor has been manually turned off
 - Also need to add relevant code in calibrate.py to handle this
