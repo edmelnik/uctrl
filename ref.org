@@ -22,7 +22,7 @@
 
   S_t D_1 D_2 [...] D_n [EOL]
 
-  Where /S_t/ is a 1-bit value that indicates the type of sensors corresponding to the datapoints
+  Where /S_t/ is a 1-byte value that indicates the type of sensors corresponding to the datapoints
 ** Non-numeric codes
 - Microcontroller outputs status and error messages particular to the different sensor types
 *** Oxygen
