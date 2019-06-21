@@ -12,7 +12,7 @@
 from influxdb import InfluxDBClient
 
 ###____   SPECIFIC PROJECT CONFIG   ____###
-PROJECT_NAME = "o2-u-ctrl"
+PROJECT_NAME = "o2_uctrl"
 TAG = "4o2avg"
 
 ###____   INFLUX SERVER CONFIG   ____###
@@ -43,19 +43,38 @@ def buildClient():
     client = InfluxDBClient(host=HOST, port=PORT, username = USERNAME, password = PASSWORD)
     return(client)
 
+client = buildClient()
+client.switch_database(DATABASE)
+
+# This list would be useful in the future to detect and tag ERR, STS and CAL messages
+nanlist = []
+for num in range(0, 9):
+    nanlist.append("ERR"+str(num))
+for num in range(0,5):
+    nanlist.append("STS"+str(num))
+for num in range(0,3):
+    nanlist.append("CAL"+str(num))
+nanlist.append("CAL")
+
 def buildJson(values):
+    parsed_vals = []
+    for val in values:
+        if val.isdigit():
+            parsed_vals.append(float(float(val)/100))
+        else:
+            parsed_vals.append(float(0))
+            
     json_body = [
         {
             "measurement": PROJECT_NAME,
             "tags": {
                 "label": TAG
             },
-            "time": values[0],
             "fields": {
-                "d1": values[1],
-                "d2": values[2],
-                "d3": values[3],
-                "d4": values[4]
+                "d1": parsed_vals[0],
+                "d2": parsed_vals[1],
+                "d3": parsed_vals[2],
+                "d4": parsed_vals[3]
             }
         }
     ]
@@ -63,8 +82,6 @@ def buildJson(values):
 
 def sendData(values):
     try:
-        client = buildClient()
-        client.switch_database(DATABASE)
         client.write_points(buildJson(values))
         return 1
     except IndexError:

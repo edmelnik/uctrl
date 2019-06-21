@@ -19,3 +19,6 @@
   - Check for a pyserial feature that returns something on tiemout
 ** TODO FEATURE MINOR Try/catch blocks for calibrate
 - Calibrate needs to do its thing forever: catch errors and continue
+** TODO FEATURE MAJOR Nonblocking module IO for client
+- Currently the client blocks until each module output is completed - bad
+- Solution: run each module in a seperate thread
