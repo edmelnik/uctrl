@@ -1,0 +1,69 @@
+#+STARTUP: indent content
+#+OPTIONS: html-postamble:nil author:nil date:nil H:4
+#+TITLE: Specifications for microcontroller prototype
+
+* Overview
+- Documented here are the specifications for upstream data flow and downstream command flow from the microcontroller
+- Reference implementations of clients adhering to these specs are provided where possible
+- 
+- This document will change multiple times as prototype development progresses
+* Upstream sensor data
+** Type
+- The microcontroller outputs *serial* data at *9600 baud*
+** Data specs
+- Data output from microcontroller is agnostic of the type of sensors connected to it
+- If the microcontroller is configured to output =n= datapoints per cycle, the format for a single line of output will be
+
+  D_1 D_2 [...] D_n [EOL]
+
+  where each /D_i/ is a datapoint and is seperated from other datapoints by a whitespace. The line will be terminated by a standard end-of-line terminator
+- Each datapoint /D_i/ is the datapoint corresponding to sensor /i/ attached to the microcontroller
+- Each datapoint /D_i/ is a utf-8 encoded 4-byte value
+- In the event that a single microcontroller is configured to receive simultaneous input from different types of sensors, the data output format will be
+
+  S_t D_1 D_2 [...] D_n [EOL]
+
+  Where /S_t/ is a 1-bit value that indicates the type of sensors corresponding to the datapoints
+** Non-numeric codes
+- Microcontroller outputs status and error messages particular to the different sensor types
+*** Oxygen
+|-------+------------------------------------------------|
+| /     | <>                                             |
+|-------+------------------------------------------------|
+| Value | Description                                    |
+|-------+------------------------------------------------|
+| ERR1  | Invalid response slave ID exception            |
+| ERR2  | Invalid response function exception            |
+| ERR3  | Response timed out exception                   |
+| ERR4  | Invalid response CRC exception                 |
+| ERR5  | Modbus protocol illegal function exception     |
+| ERR6  | Modbus protocol illegal data address exception |
+| ERR7  | Modbus protocol illegal data value exception   |
+| ERR8  | Modbus protocol device failure                 |
+| STS0  | Sensor idle status                             |
+| STS1  | Sensor startup status                          |
+| STS2  | Sensor active status                           |
+| STS3  | Sensor shutdown status                         |
+| STS4  | Sensor standby status                          |
+| CAL0  | Calibration idle status                        |
+| CAL1  | Calibration in progress                        |
+| CAL2  | Calibration complete status                    |
+|-------+------------------------------------------------|
+*** Pressure
+|-------+-------------------------------|
+| /     | <>                            |
+|-------+-------------------------------|
+| Value | Description                   |
+|-------+-------------------------------|
+| ERR1  | Sensor in command mode error  |
+| ERR2  | Stale data error              |
+| ERR3  | Sensor diagnostic fault error |
+| ERR4  | Sensor missing error          |
+|-------+-------------------------------|
+** Reference implementation
+- It is recommended that the data is timestamped on the data node responsible for receiving data from the microcontroller
+- Reference implementation of upstream communication client can be found in [[https://github.com/adkian/uctrl/blob/master/src/client/client.py][src/client/client.py]]
+* Downstream commnds
+** Oxygen sensors
+- 
+** O_2 sensor calibration
