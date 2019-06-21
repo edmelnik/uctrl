@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-06-21 Fri 12:43 -->
+<!-- 2019-06-21 Fri 14:19 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Specifications for microcontroller prototype</title>
@@ -268,33 +268,33 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd7bfb16">1. Overview</a></li>
-<li><a href="#orga686ee9">2. Upstream sensor data</a>
+<li><a href="#org32fdc05">1. Overview</a></li>
+<li><a href="#org389608c">2. Upstream sensor data</a>
 <ul>
-<li><a href="#orgda4ce0b">2.1. Type</a></li>
-<li><a href="#orge9bbdc2">2.2. Data specs</a></li>
-<li><a href="#org67b06a9">2.3. Non-numeric codes</a>
+<li><a href="#org223564f">2.1. Type</a></li>
+<li><a href="#org3149572">2.2. Data specs</a></li>
+<li><a href="#org94e578e">2.3. Non-numeric codes</a>
 <ul>
-<li><a href="#org96defb1">2.3.1. Oxygen</a></li>
-<li><a href="#orgf5613da">2.3.2. Pressure</a></li>
+<li><a href="#org3d48563">2.3.1. Oxygen</a></li>
+<li><a href="#org33b8fff">2.3.2. Pressure</a></li>
 </ul>
 </li>
-<li><a href="#orgdfec3ef">2.4. Reference implementation</a></li>
+<li><a href="#orga19ad82">2.4. Reference implementation</a></li>
 </ul>
 </li>
-<li><a href="#org2f54c49">3. Downstream commnds</a>
+<li><a href="#org3237c51">3. Downstream commnds</a>
 <ul>
-<li><a href="#orge5d4529">3.1. Oxygen sensors</a></li>
-<li><a href="#org48e1005">3.2. Pressure sensors</a></li>
-<li><a href="#org646fece">3.3. Reference implementation</a></li>
+<li><a href="#org39d7999">3.1. Oxygen sensors</a></li>
+<li><a href="#org0fcbca8">3.2. Pressure sensors</a></li>
+<li><a href="#org486b19f">3.3. Reference implementation</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd7bfb16" class="outline-2">
-<h2 id="orgd7bfb16"><span class="section-number-2">1</span> Overview</h2>
+<div id="outline-container-org32fdc05" class="outline-2">
+<h2 id="org32fdc05"><span class="section-number-2">1</span> Overview</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Documented here are the specifications for upstream data flow and downstream command flow from the microcontroller</li>
@@ -303,20 +303,20 @@ for the JavaScript code in this tag.
 </ul>
 </div>
 </div>
-<div id="outline-container-orga686ee9" class="outline-2">
-<h2 id="orga686ee9"><span class="section-number-2">2</span> Upstream sensor data</h2>
+<div id="outline-container-org389608c" class="outline-2">
+<h2 id="org389608c"><span class="section-number-2">2</span> Upstream sensor data</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-orgda4ce0b" class="outline-3">
-<h3 id="orgda4ce0b"><span class="section-number-3">2.1</span> Type</h3>
+<div id="outline-container-org223564f" class="outline-3">
+<h3 id="org223564f"><span class="section-number-3">2.1</span> Type</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>The microcontroller outputs <b>serial</b> data at <b>9600 baud</b></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orge9bbdc2" class="outline-3">
-<h3 id="orge9bbdc2"><span class="section-number-3">2.2</span> Data specs</h3>
+<div id="outline-container-org3149572" class="outline-3">
+<h3 id="org3149572"><span class="section-number-3">2.2</span> Data specs</h3>
 <div class="outline-text-3" id="text-2-2">
 <ul class="org-ul">
 <li>Data output from microcontroller is agnostic of the type of sensors connected to it</li>
@@ -342,20 +342,20 @@ S<sub>t</sub> D<sub>1</sub> D<sub>2</sub> [&#x2026;] D<sub>n</sub> [EOL]
 </p>
 
 <p>
-Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors corresponding to the datapoints
+Where <i>S<sub>t</sub></i> is a 1-byte value that indicates the type of sensors corresponding to the datapoints
 </p></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org67b06a9" class="outline-3">
-<h3 id="org67b06a9"><span class="section-number-3">2.3</span> Non-numeric codes</h3>
+<div id="outline-container-org94e578e" class="outline-3">
+<h3 id="org94e578e"><span class="section-number-3">2.3</span> Non-numeric codes</h3>
 <div class="outline-text-3" id="text-2-3">
 <ul class="org-ul">
 <li>Microcontroller outputs status and error messages particular to the different sensor types</li>
 </ul>
 </div>
-<div id="outline-container-org96defb1" class="outline-4">
-<h4 id="org96defb1"><span class="section-number-4">2.3.1</span> Oxygen</h4>
+<div id="outline-container-org3d48563" class="outline-4">
+<h4 id="org3d48563"><span class="section-number-4">2.3.1</span> Oxygen</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -457,8 +457,8 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </table>
 </div>
 </div>
-<div id="outline-container-orgf5613da" class="outline-4">
-<h4 id="orgf5613da"><span class="section-number-4">2.3.2</span> Pressure</h4>
+<div id="outline-container-org33b8fff" class="outline-4">
+<h4 id="org33b8fff"><span class="section-number-4">2.3.2</span> Pressure</h4>
 <div class="outline-text-4" id="text-2-3-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -501,8 +501,8 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </div>
 </div>
 </div>
-<div id="outline-container-orgdfec3ef" class="outline-3">
-<h3 id="orgdfec3ef"><span class="section-number-3">2.4</span> Reference implementation</h3>
+<div id="outline-container-orga19ad82" class="outline-3">
+<h3 id="orga19ad82"><span class="section-number-3">2.4</span> Reference implementation</h3>
 <div class="outline-text-3" id="text-2-4">
 <ul class="org-ul">
 <li>It is recommended that the data is timestamped on the data node responsible for receiving data from the microcontroller</li>
@@ -511,12 +511,12 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </div>
 </div>
 </div>
-<div id="outline-container-org2f54c49" class="outline-2">
-<h2 id="org2f54c49"><span class="section-number-2">3</span> Downstream commnds</h2>
+<div id="outline-container-org3237c51" class="outline-2">
+<h2 id="org3237c51"><span class="section-number-2">3</span> Downstream commnds</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orge5d4529" class="outline-3">
-<h3 id="orge5d4529"><span class="section-number-3">3.1</span> Oxygen sensors</h3>
+<div id="outline-container-org39d7999" class="outline-3">
+<h3 id="org39d7999"><span class="section-number-3">3.1</span> Oxygen sensors</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>The commands the SST sensors require for routing operation include <code>ON</code>, <code>OFF</code> and <code>CALIBRATE</code></li>
@@ -544,16 +544,16 @@ where check delay is currently hardcoded into the microcontroller &#x2013; see t
 </ul>
 </div>
 </div>
-<div id="outline-container-org48e1005" class="outline-3">
-<h3 id="org48e1005"><span class="section-number-3">3.2</span> Pressure sensors</h3>
+<div id="outline-container-org0fcbca8" class="outline-3">
+<h3 id="org0fcbca8"><span class="section-number-3">3.2</span> Pressure sensors</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li>The pressure sensors do not support any commands</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org646fece" class="outline-3">
-<h3 id="org646fece"><span class="section-number-3">3.3</span> Reference implementation</h3>
+<div id="outline-container-org486b19f" class="outline-3">
+<h3 id="org486b19f"><span class="section-number-3">3.3</span> Reference implementation</h3>
 <div class="outline-text-3" id="text-3-3">
 <ul class="org-ul">
 <li>Reference implementation of the downstream command client can be found in <a href="https://github.com/adkian/uctrl/blob/master/src/client/calibrate.py">src/client/calibrate.py</a></li>
