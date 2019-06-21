@@ -22,3 +22,4 @@
 ** TODO FEATURE MAJOR Nonblocking module IO for client
 - Currently the client blocks until each module output is completed - bad
 - Solution: run each module in a seperate thread
+** TODO BUGFIX MINOR Non-numeric values in influx.py module should not be 0 but undefined
