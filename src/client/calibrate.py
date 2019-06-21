@@ -19,10 +19,7 @@ LOW = 0
 CONF = "calibrate.conf"
 CHK_DELAY = 50 # num cycles to wait for checking changes in addr, signal_length, pin
 
-def power(code):
-    pass
-
-def calibrate(code, device, pin, signal_length):
+def sendCommands(code, device, pin, signal_length):
     dev = serial.Serial(device)
     print("Sending calibration code " + code + " to address " + device) # TODO log
     wp.digitalWrite(pin, LOW)
@@ -49,15 +46,14 @@ def main():
         config = configparser.ConfigParser()
         config.read(CONF)
         if config['calibration']['activate'] == '1':
-            code = config['calibration']['code']
-            calibrate(code, device, pin, signal_length)
-            # Reset config activation to 0
+            code = config['power']['code']
+            code += config['calibration']['code']
+            sendCommands(code, device, pin, signal_length)
+            # Reset config to defaults (except power)
             config['calibration']['activate'] = '0'
             config['calibration']['code'] = '0000'
             with open(CONF, 'w') as updated_conf:
                 config.write(updated_conf)
-        if config['power']['activate'] == '1':
-            power(config['power']['code'])
 
         if k==CHK_DELAY:
             device = config['device']['addr']

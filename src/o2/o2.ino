@@ -228,7 +228,6 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
 
 int handleCommands(){
     int cmd = 0, count = 0, i, garbage;
-    Serial.println("GITCMD");
     for(i=0; i<8 && Serial.available()>0; i++){
 	cmd = Serial.read();
 	if(i<=3){ // Handle power commands
@@ -281,10 +280,6 @@ void loop(){
     buffer = malloc(50);
     
     for(i=0; i<NUM_SENSORS; i++){
-	// Serial.print(cal[i]);
-	// Serial.print(" ");
-	// Serial.println(flag[i]);
-	
 	output = malloc(20);
 	if(flag[i] == FLAG_OFF && status[i] == ON){ // Flagged for manual shutdown
 	    retval = getVal(i, output, 0);
