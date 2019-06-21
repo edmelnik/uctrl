@@ -5,7 +5,6 @@
 * Overview
 - Documented here are the specifications for upstream data flow and downstream command flow from the microcontroller
 - Reference implementations of clients adhering to these specs are provided where possible
-- 
 - This document will change multiple times as prototype development progresses
 * Upstream sensor data
 ** Type
@@ -65,5 +64,21 @@
 - Reference implementation of upstream communication client can be found in [[https://github.com/adkian/uctrl/blob/master/src/client/client.py][src/client/client.py]]
 * Downstream commnds
 ** Oxygen sensors
-- 
-** O_2 sensor calibration
+- The commands the SST sensors require for routing operation include =ON=, =OFF= and =CALIBRATE=
+- Interrupts pins to the microcontroller should be connected at *PIN 12* and must be at a *default high* state
+- Commands need to be relayed to the microcontroller on the *serial rx* line running at *9600* baud
+- The following steps must be taken to send relevant commands to the microcontroller
+  1. Hold the interrupt pin at low for /n/ seconds (detailed below)
+  2. Relay the 8-byte utf-8 encoded ASCII command code on serial
+- The command code has the following format: 
+
+  =ppppcccc=
+  
+  where each /p_i/ is an ASCII value of "0" or "1" and indicates the power action for sensor /i/, while each /c_i/ is an ASCII value of "0" or "1" and indicates the calibration action for sensor /i/
+- The default power action value for each /p_i/ is "1" (sensor powered on by default), while the default calibration action value for each /c_i/ is "0" by default (no calibration action by default)
+- The value of /n/ should be at least \begin{equation} n = \lceil \dfrac{\textrm{check delay}}{\textrm{cycles/sec}} \rceil \end{equation}
+  where check delay is currently hardcoded into the microcontroller -- see the variable =CHK_DELAY= defined in [[https://github.com/adkian/uctrl/blob/master/src/o2/o2.ino][src/o2/o2.ino]] -- and cycles/second are the number of microcontroller cycles per second, which correspond to number of microcontroller serial outputs per second and should be determined dynamically by the communication client
+** Pressure sensors
+- The pressure sensors do not support any commands
+** Reference implementation
+- Reference implementation of the downstream command client can be found in [[https://github.com/adkian/uctrl/blob/master/src/client/calibrate.py][src/client/calibrate.py]]

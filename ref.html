@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-06-21 Fri 00:14 -->
+<!-- 2019-06-21 Fri 12:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Specifications for microcontroller prototype</title>
@@ -238,6 +238,28 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content">
@@ -246,32 +268,33 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org187d7b7">1. Overview</a></li>
-<li><a href="#orge63d5ed">2. Upstream sensor data</a>
+<li><a href="#orgd7bfb16">1. Overview</a></li>
+<li><a href="#orga686ee9">2. Upstream sensor data</a>
 <ul>
-<li><a href="#orgbec35a3">2.1. Type</a></li>
-<li><a href="#org0c94f67">2.2. Data specs</a></li>
-<li><a href="#orgde71f37">2.3. Non-numeric codes</a>
+<li><a href="#orgda4ce0b">2.1. Type</a></li>
+<li><a href="#orge9bbdc2">2.2. Data specs</a></li>
+<li><a href="#org67b06a9">2.3. Non-numeric codes</a>
 <ul>
-<li><a href="#orgb033dbf">2.3.1. Oxygen</a></li>
-<li><a href="#org8ea25c7">2.3.2. Pressure</a></li>
+<li><a href="#org96defb1">2.3.1. Oxygen</a></li>
+<li><a href="#orgf5613da">2.3.2. Pressure</a></li>
 </ul>
 </li>
-<li><a href="#orgd9ba2ee">2.4. Reference implementation</a></li>
+<li><a href="#orgdfec3ef">2.4. Reference implementation</a></li>
 </ul>
 </li>
-<li><a href="#orgfa7aba1">3. Downstream commnds</a>
+<li><a href="#org2f54c49">3. Downstream commnds</a>
 <ul>
-<li><a href="#orgc38b859">3.1. </a></li>
-<li><a href="#org59275b1">3.2. O<sub>2</sub> sensor calibration</a></li>
+<li><a href="#orge5d4529">3.1. Oxygen sensors</a></li>
+<li><a href="#org48e1005">3.2. Pressure sensors</a></li>
+<li><a href="#org646fece">3.3. Reference implementation</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org187d7b7" class="outline-2">
-<h2 id="org187d7b7"><span class="section-number-2">1</span> Overview</h2>
+<div id="outline-container-orgd7bfb16" class="outline-2">
+<h2 id="orgd7bfb16"><span class="section-number-2">1</span> Overview</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>Documented here are the specifications for upstream data flow and downstream command flow from the microcontroller</li>
@@ -280,20 +303,20 @@ for the JavaScript code in this tag.
 </ul>
 </div>
 </div>
-<div id="outline-container-orge63d5ed" class="outline-2">
-<h2 id="orge63d5ed"><span class="section-number-2">2</span> Upstream sensor data</h2>
+<div id="outline-container-orga686ee9" class="outline-2">
+<h2 id="orga686ee9"><span class="section-number-2">2</span> Upstream sensor data</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-orgbec35a3" class="outline-3">
-<h3 id="orgbec35a3"><span class="section-number-3">2.1</span> Type</h3>
+<div id="outline-container-orgda4ce0b" class="outline-3">
+<h3 id="orgda4ce0b"><span class="section-number-3">2.1</span> Type</h3>
 <div class="outline-text-3" id="text-2-1">
 <ul class="org-ul">
 <li>The microcontroller outputs <b>serial</b> data at <b>9600 baud</b></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org0c94f67" class="outline-3">
-<h3 id="org0c94f67"><span class="section-number-3">2.2</span> Data specs</h3>
+<div id="outline-container-orge9bbdc2" class="outline-3">
+<h3 id="orge9bbdc2"><span class="section-number-3">2.2</span> Data specs</h3>
 <div class="outline-text-3" id="text-2-2">
 <ul class="org-ul">
 <li>Data output from microcontroller is agnostic of the type of sensors connected to it</li>
@@ -324,15 +347,15 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </ul>
 </div>
 </div>
-<div id="outline-container-orgde71f37" class="outline-3">
-<h3 id="orgde71f37"><span class="section-number-3">2.3</span> Non-numeric codes</h3>
+<div id="outline-container-org67b06a9" class="outline-3">
+<h3 id="org67b06a9"><span class="section-number-3">2.3</span> Non-numeric codes</h3>
 <div class="outline-text-3" id="text-2-3">
 <ul class="org-ul">
 <li>Microcontroller outputs status and error messages particular to the different sensor types</li>
 </ul>
 </div>
-<div id="outline-container-orgb033dbf" class="outline-4">
-<h4 id="orgb033dbf"><span class="section-number-4">2.3.1</span> Oxygen</h4>
+<div id="outline-container-org96defb1" class="outline-4">
+<h4 id="org96defb1"><span class="section-number-4">2.3.1</span> Oxygen</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -434,8 +457,8 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </table>
 </div>
 </div>
-<div id="outline-container-org8ea25c7" class="outline-4">
-<h4 id="org8ea25c7"><span class="section-number-4">2.3.2</span> Pressure</h4>
+<div id="outline-container-orgf5613da" class="outline-4">
+<h4 id="orgf5613da"><span class="section-number-4">2.3.2</span> Pressure</h4>
 <div class="outline-text-4" id="text-2-3-2">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -478,8 +501,8 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </div>
 </div>
 </div>
-<div id="outline-container-orgd9ba2ee" class="outline-3">
-<h3 id="orgd9ba2ee"><span class="section-number-3">2.4</span> Reference implementation</h3>
+<div id="outline-container-orgdfec3ef" class="outline-3">
+<h3 id="orgdfec3ef"><span class="section-number-3">2.4</span> Reference implementation</h3>
 <div class="outline-text-3" id="text-2-4">
 <ul class="org-ul">
 <li>It is recommended that the data is timestamped on the data node responsible for receiving data from the microcontroller</li>
@@ -488,15 +511,54 @@ Where <i>S<sub>t</sub></i> is a 1-bit value that indicates the type of sensors c
 </div>
 </div>
 </div>
-<div id="outline-container-orgfa7aba1" class="outline-2">
-<h2 id="orgfa7aba1"><span class="section-number-2">3</span> Downstream commnds</h2>
+<div id="outline-container-org2f54c49" class="outline-2">
+<h2 id="org2f54c49"><span class="section-number-2">3</span> Downstream commnds</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgc38b859" class="outline-3">
-<h3 id="orgc38b859"><span class="section-number-3">3.1</span> </h3>
+<div id="outline-container-orge5d4529" class="outline-3">
+<h3 id="orge5d4529"><span class="section-number-3">3.1</span> Oxygen sensors</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>The commands the SST sensors require for routing operation include <code>ON</code>, <code>OFF</code> and <code>CALIBRATE</code></li>
+<li>Interrupts pins to the microcontroller should be connected at <b>PIN 12</b> and must be at a <b>default high</b> state</li>
+<li>Commands need to be relayed to the microcontroller on the <b>serial rx</b> line running at <b>9600</b> baud</li>
+<li>The following steps must be taken to send relevant commands to the microcontroller
+<ol class="org-ol">
+<li>Hold the interrupt pin at low for <i>n</i> seconds (detailed below)</li>
+<li>Relay the 8-byte utf-8 encoded ASCII command code on serial</li>
+</ol></li>
+<li><p>
+The command code has the following format: 
+</p>
+
+<p>
+<code>ppppcccc</code>
+</p>
+
+<p>
+where each <i>p<sub>i</sub></i> is an ASCII value of "0" or "1" and indicates the power action for sensor <i>i</i>, while each <i>c<sub>i</sub></i> is an ASCII value of "0" or "1" and indicates the calibration action for sensor <i>i</i>
+</p></li>
+<li>The default power action value for each <i>p<sub>i</sub></i> is "1" (sensor powered on by default), while the default calibration action value for each <i>c<sub>i</sub></i> is "0" by default (no calibration action by default)</li>
+<li>The value of <i>n</i> should be at least \begin{equation} n = &lceil; \dfrac{\textrm{check delay}}{\textrm{cycles/sec}} &rceil; \end{equation}
+where check delay is currently hardcoded into the microcontroller &#x2013; see the variable <code>CHK_DELAY</code> defined in <a href="https://github.com/adkian/uctrl/blob/master/src/o2/o2.ino">src/o2/o2.ino</a> &#x2013; and cycles/second are the number of microcontroller cycles per second, which correspond to number of microcontroller serial outputs per second and should be determined dynamically by the communication client</li>
+</ul>
 </div>
-<div id="outline-container-org59275b1" class="outline-3">
-<h3 id="org59275b1"><span class="section-number-3">3.2</span> O<sub>2</sub> sensor calibration</h3>
+</div>
+<div id="outline-container-org48e1005" class="outline-3">
+<h3 id="org48e1005"><span class="section-number-3">3.2</span> Pressure sensors</h3>
+<div class="outline-text-3" id="text-3-2">
+<ul class="org-ul">
+<li>The pressure sensors do not support any commands</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org646fece" class="outline-3">
+<h3 id="org646fece"><span class="section-number-3">3.3</span> Reference implementation</h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li>Reference implementation of the downstream command client can be found in <a href="https://github.com/adkian/uctrl/blob/master/src/client/calibrate.py">src/client/calibrate.py</a></li>
+</ul>
+</div>
 </div>
 </div>
 </div>
