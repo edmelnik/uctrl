@@ -76,7 +76,10 @@
   
   where each /p_i/ is an ASCII value of "0" or "1" and indicates the power action for sensor /i/, while each /c_i/ is an ASCII value of "0" or "1" and indicates the calibration action for sensor /i/
 - The default power action value for each /p_i/ is "1" (sensor powered on by default), while the default calibration action value for each /c_i/ is "0" by default (no calibration action by default)
-- The value of /n/ should be at least \begin{equation} n = \lceil \dfrac{\textrm{check delay}}{\textrm{cycles/sec}} \rceil \end{equation}
+- The value of /n/ should be at least 
+
+  /n/ = ceil((/check delay/)/(/cycles per sec/))
+
   where check delay is currently hardcoded into the microcontroller -- see the variable =CHK_DELAY= defined in [[https://github.com/adkian/uctrl/blob/master/src/o2/o2.ino][src/o2/o2.ino]] -- and cycles/second are the number of microcontroller cycles per second, which correspond to number of microcontroller serial outputs per second and should be determined dynamically by the communication client
 ** Pressure sensors
 - The pressure sensors do not support any commands
