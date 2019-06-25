@@ -53,6 +53,8 @@ import time
 import sys
 import configparser
 import importlib
+import threading
+import queue
 
 BAUD = 9600
 # Output values in config file
@@ -130,7 +132,8 @@ def main():
             q = queue.SimpleQueue()
             queue_dict[module] = q
             handler_instance = ModuleHandler(module, q)            
-            threading.Thread(target=handler_instance.handleOutput, name="t_"+module)
+            t = threading.Thread(target=handler_instance.handleOutput, name="t_"+module)
+            t.start()
         except ModuleNotFoundError:
             # TODO Log
             continue
