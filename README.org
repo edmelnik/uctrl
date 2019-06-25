@@ -1,28 +1,6 @@
 #+STARTUP: indent content
 * Atmel microcontroller tests
 - Multiple sensor data acquisition using TWI
-* TODOs
-** DONE BUGFIX MAJOR Calibration routine falters when a single sensor is calibrated
-- This is bad because if unexpected sensors are calibrated, they will not necessarily have the pumps in the correct direction 
-- Two possible explanations
-  - Calibration =mark= not being reset in microcontroller O2 code
-  - Microcontroller is not clearing the serial recieve buffer, leading to stale data being read again 
-*** Closing note
-- Stale data in microcontroller serial rx buffer is being purged in =handleCommands()=
-** TODO FEATURE MEDIUM Manual powering ON/OFF for o2 sensors
-- This is not supported in o2: add a flag (perhaps by just generalizing =cal_mark=) that indicates that a sensor has been manually turned off
-- Also need to add relevant code in calibrate.py to handle this
-** TODO BUGFIX MEDIUM Client needs to actually timeout
-- Client currently does not timeout while reading serial data, only if it gets 0 datapoints
-  - This behavior was specific to certain issues with the pressure sensors
-- Client should timeout when reading data from device
-  - Check for a pyserial feature that returns something on tiemout
-** TODO FEATURE MINOR Try/catch blocks for calibrate
-- Calibrate needs to do its thing forever: catch errors and continue
-** TODO FEATURE MEDIUM TODO String construction in getVal() should be optimized
-- Base strings should be global and in progmem, these strings should be copied as needed in getVal
-** TODO FEATURE MAJOR Nonblocking module IO for client
-- Currently the client blocks until each module output is completed - bad
-- Solution: run each module in a seperate thread
-** TODO BUGFIX MINOR Non-numeric values in influx.py module should not be 0 but undefined
+- See folder docs
+
 
