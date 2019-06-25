@@ -58,6 +58,7 @@ BAUD = 9600
 # Output values in config file
 OUTPUT_FUNC = 'sendData'
 CLIENT_CONF = 'client.conf'
+queue_dict = {}
 
 def connect(config):
     connected = False
@@ -104,22 +105,36 @@ def doOutput(config, values):
     output = config['output']
     for module in output:
         if output[module] == "1":
+            queue_dict[module].put(values)
+
+class ModuleHandler():
+    def __init__(self, module_name, q):
+        self.module_queue = q
+        self.module_name = module_name
+    def handleOutput(self):
+        while True:
+            values = self.module_queue.get(block=True)
             try:
-                return_status = getattr(sys.modules[module], OUTPUT_FUNC)(values)
+                status = getattr(sys.modules[self.module_name], OUTPUT_FUNC)(values)
             except: # TODO Log
                 continue
-        
+            
 def main():
     config = configparser.ConfigParser()
     config.read(CLIENT_CONF)    
     device = connect(config)
     
-    for output_option in config['output']:
+    for module in config['output']:
         try:
-            importlib.import_module(output_option)
+            importlib.import_module(module)
+            q = queue.SimpleQueue()
+            queue_dict[module] = q
+            handler_instance = ModuleHandler(module, q)            
+            threading.Thread(target=handler_instance.handleOutput, name="t_"+module)
         except ModuleNotFoundError:
             # TODO Log
-            continue    
+            continue
+        
     initData(device)
     while True:
         config.read(CLIENT_CONF) # Read config for changes

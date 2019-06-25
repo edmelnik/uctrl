@@ -1,5 +1,11 @@
-#+OPTIONS: ident content
+#+STARTUP: indent content
 
+* TODO FEATURE MAJOR Client should not block if one of the output modules block
+- This can happen when, for example, network drops and influx times out. Client should not block in this case
+- =sendData= for each output module should run in its own thread
+  - Instantiate a =queue= for each thread
+  - Thread will block on =queue.get()=
+  - If output is configured in conf, the main thread will push data into the output's queue 
 * DONE BUGFIX MAJOR Calibration routine falters when a single sensor is calibrated
 - This is bad because if unexpected sensors are calibrated, they will not necessarily have the pumps in the correct direction 
 - Two possible explanations
