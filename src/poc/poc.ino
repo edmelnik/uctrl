@@ -20,7 +20,7 @@
 #define ADDR_REG    40006
 #define ERR_CLR_REG 40002
 
-#define MAX_SENSORS 9
+#define MAX_SENSORS 6
 
 // Constant mux address
 #define MUXADDR 0x70
@@ -336,7 +336,7 @@ void loop(){
 	Serial.println(buffer);
 	free(buffer);
     
-	if(k==CHK_DELAY && digitalRead(12)==LOW){
+	if(k==CHK_DELAY && Serial.available()){
 	    handleCommands();
 	    for(i=0; i< NUM_SENSORS; i++)
 		if(flag[i] == FLAG_CAL || flag[i] == FLAG_OFF)
@@ -359,7 +359,7 @@ void loop(){
 	// indexed by 1 to correspond with mux_channel
 	for(i=1; i<MAX_SENSORS; i++){
 	    retval = get_i2c(MUXADDR, i, SLAVE_ADDR,
-			     P_MIN0, P_MAX0, pressure);
+			     P_MIN1, P_MAX1, pressure);
 	    buf_ptr += snprintf(buffer+buf_ptr, 50-buf_ptr,
 				" %s ", pressure);
 	}
