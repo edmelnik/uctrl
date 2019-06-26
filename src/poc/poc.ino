@@ -20,6 +20,21 @@
 #define ADDR_REG    40006
 #define ERR_CLR_REG 40002
 
+#define MAX_SENSORS 9
+
+// Constant mux address
+#define MUXADDR 0x70
+
+// see hsc_ssc_i2c.h for a description of these values
+// these defaults are valid for the HSCMRNN030PA2A3 chip
+#define SLAVE_ADDR 0x28
+#define OUTPUT_MIN 0
+#define OUTPUT_MAX 0x3fff       // 2^14 - 1
+#define P_MIN0 -1
+#define P_MAX0 1
+#define P_MIN1 -5
+#define P_MAX1 5
+
 // Starting PIN on the microcontroller
 const static unsigned int START_PIN PROGMEM = 4;
 // Delay for periodic checks (status, calibration et cetera)
@@ -43,37 +58,11 @@ const static int FLAG_CAL  PROGMEM = 1;
 const static int FLAG_DONE PROGMEM = 2;
 const static int FLAG_OFF  PROGMEM = 3;
 
-#define MAX_SENSORS 9
-
-// Constant mux address
-#define MUXADDR 0x70
-
-// see hsc_ssc_i2c.h for a description of these values
-// these defaults are valid for the HSCMRNN030PA2A3 chip
-#define SLAVE_ADDR 0x28
-#define OUTPUT_MIN 0
-#define OUTPUT_MAX 0x3fff       // 2^14 - 1
-/* #define P_MIN0 -27.07        // min is 0 for sensors that give absolute values */
-/* #define P_MAX0 27.07   // 1psi (and we want results in pascals) */
-/* #define P_MIN1 -135.35 */
-/* #define P_MAX1 135.35 */
-
-// Following values are valid for the SSC PD001/PD005 (3/5V) sensors currently in use
-#define P_MIN0 -1
-#define P_MAX0 1
-#define P_MIN1 -5
-#define P_MAX1 5
-
 uint32_t prev = 0;
 const uint32_t interval = 10;
 
 SoftwareSerial modbus(4, 5);
-SoftwareSerial pressure(6, 7);
-
-// SoftwareSerial *modbus = malloc(sizeof(SoftwareSerial)*4);
-
 ModbusMaster *node = malloc(sizeof(ModbusMaster)*4);
-// ModbusMaster node[NUM_SENSORS];
 
 /*
   Status < 0 means there's an active error code in err[] for the sensor
@@ -291,7 +280,6 @@ void setup(){
     Serial.setTimeout(2000);
     Serial.begin(BAUD); // To USB output
     modbus.begin(BAUD); // To RS485 bus
-    pressure.begin(BAUD); // pressure
     Wire.begin();
     
     // Actual sensor addresses are indexed by 1, but
