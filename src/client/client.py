@@ -156,5 +156,5 @@ while True:
     #     sys.exit()
     except serial.SerialException:
         continue
-    # except:
-    #     continue
+    except:
+        continue
