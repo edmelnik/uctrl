@@ -69,11 +69,12 @@ def buildJson(values):
     elif values[1] == "P":
         tag = TAG_pressure
         for i in range(2, len(values)):
-            if values[i].isdigit():
+            try:
                 parsed_vals.append(float(values[i]))
-            else:
+            except ValueError:
                 parsed_vals.append(float(0))
     json_body = [
+
         {
             "measurement": PROJECT_NAME,
             "tags": {
