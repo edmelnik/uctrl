@@ -116,11 +116,15 @@ class ModuleHandler():
     def handleOutput(self):
         while True:
             values = self.module_queue.get(block=True)
+            if(values[0] == "END"):
+                break
             try:
                 status = getattr(sys.modules[self.module_name], OUTPUT_FUNC)(values)
             except: # TODO Log
                 continue
-            
+        return 1;
+
+output_threads = []            
 def main():
     config = configparser.ConfigParser()
     config.read(CLIENT_CONF)    
@@ -133,6 +137,7 @@ def main():
             queue_dict[module] = q
             handler_instance = ModuleHandler(module, q)            
             t = threading.Thread(target=handler_instance.handleOutput, name="t_"+module)
+            output_threads.append(t)
             t.start()
         except ModuleNotFoundError:
             # TODO Log
@@ -148,13 +153,24 @@ def main():
         else:
             doOutput(config, values)
 
+def end():
+    endval = ["END"]
+    config = configparser.ConfigParser()
+    config.read(CLIENT_CONF)
+    output = config['output']
+    for module in output:
+        queue_dict[module].put(endval)
+    for thread in output_threads:
+        thread.join()
+        
 # Don't stop even if device gets disconnected            
 while True:
     try:
         main()
-    # except KeyboardInterrupt:
-    #     sys.exit()
-    except serial.SerialException:
-        continue
-    except:
-        continue
+    except KeyboardInterrupt:
+        end()
+        sys.exit()
+    # except serial.SerialException:
+    #     continue
+    # except:
+    #     continue
