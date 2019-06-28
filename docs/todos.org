@@ -1,11 +1,5 @@
 #+STARTUP: indent content
 
-* TODO FEATURE MAJOR Client should not block if one of the output modules block
-- This can happen when, for example, network drops and influx times out. Client should not block in this case
-- =sendData= for each output module should run in its own thread
-  - Instantiate a =queue= for each thread
-  - Thread will block on =queue.get()=
-  - If output is configured in conf, the main thread will push data into the output's queue 
 * DONE BUGFIX MAJOR Calibration routine falters when a single sensor is calibrated
 - This is bad because if unexpected sensors are calibrated, they will not necessarily have the pumps in the correct direction 
 - Two possible explanations
@@ -14,10 +8,20 @@
 * DONE FEATURE MEDIUM Manual powering ON/OFF for o2 sensors
 - This is not supported in o2: add a flag (perhaps by just generalizing =cal_mark=) that indicates that a sensor has been manually turned off
 - Also need to add relevant code in calibrate.py to handle this
-* TODO BUGFIX MEDIUM Client needs to actually timeout
+* TODO FEATURE MINOR Try/catch blocks for calibrate
+- Calibrate needs to do its thing forever: catch errors and continue
+* Client
+** TODO BUGFIX MEDIUM Client needs to actually timeout
 - Client currently does not timeout while reading serial data, only if it gets 0 datapoints
   - This behavior was specific to certain issues with the pressure sensors
 - Client should timeout when reading data from device
   - Check for a pyserial feature that returns something on tiemout
-* TODO FEATURE MINOR Try/catch blocks for calibrate
-- Calibrate needs to do its thing forever: catch errors and continue
+** TODO FEATURE MEDIUM Client should check DOA status of output threads
+- Similar to check delay in the microcontroller code
+- If threads are dead, run them again
+** DONE FEATURE MAJOR Client should not block if one of the output modules block
+- This can happen when, for example, network drops and influx times out. Client should not block in this case
+- =sendData= for each output module should run in its own thread
+  - Instantiate a =queue= for each thread
+  - Thread will block on =queue.get()=
+  - If output is configured in conf, the main thread will push data into the output's queue 
