@@ -173,6 +173,7 @@ while True:
     except KeyboardInterrupt:
         end()
         sys.exit()
-    except:
-        end()
-        continue
+    # except serial.SerialException:
+    #     continue
+    # except:
+    #     continue
