@@ -13,7 +13,8 @@ from influxdb import InfluxDBClient
 
 ###____   SPECIFIC PROJECT CONFIG   ____###
 PROJECT_NAME = "o2_uctrl"
-TAG = "4o2avg"
+TAG_o2 = "4o2avg"
+TAG_pressure = "pressure"
 
 ###____   INFLUX SERVER CONFIG   ____###
 #Uncomment to use Sandbox Server config
@@ -58,17 +59,26 @@ nanlist.append("CAL")
 
 def buildJson(values):
     parsed_vals = []
-    for i in range(1, len(values)):
-        if values[i].isdigit():
-            parsed_vals.append(float(float(values[i])/100))
-        else:
-            parsed_vals.append(float(0))
-            
+    if values[1] == "O":
+        tag = TAG_o2
+        for i in range(2, len(values)):
+            if values[i].isdigit():
+                parsed_vals.append(float(float(values[i])/100))
+            else:
+                parsed_vals.append(float(0))
+    elif values[1] == "P":
+        tag = TAG_pressure
+        for i in range(2, len(values)):
+            try:
+                parsed_vals.append(float(values[i]))
+            except ValueError:
+                parsed_vals.append(float(0))
     json_body = [
+
         {
             "measurement": PROJECT_NAME,
             "tags": {
-                "label": TAG
+                "label": tag
             },
             "fields": {
                 "d1": parsed_vals[0],
