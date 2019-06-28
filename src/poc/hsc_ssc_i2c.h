@@ -58,8 +58,9 @@ uint8_t ps_convert(const struct cs_raw raw, float *pressure,
 		   float *temperature, const uint16_t output_min,
 		   const uint16_t output_max, const float pressure_min,
                    const float pressure_max){
-    *pressure = 1.0 * (raw.bridge_data - output_min) * (pressure_max - pressure_min) / (output_max - output_min) + pressure_min;
+    /* *pressure = 1.0 * (raw.bridge_data - output_min) * (pressure_max - pressure_min) / (output_max - output_min) + pressure_min; */
     /* *pressure = (raw.bridge_data - 1638.0)*2/(1638.0 - 14745.0) - 1; */
+    *pressure = raw.bridge_data*10/16383-5; // Hardcoded values for 5psi sensors
     *temperature = (raw.temperature_data * 0.0977) - 50; // Is this correct?
     return 0;  
 }
