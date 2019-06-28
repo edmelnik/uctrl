@@ -159,7 +159,10 @@ def end():
     config.read(CLIENT_CONF)
     output = config['output']
     for module in output:
-        queue_dict[module].put(endval)
+        try:
+            queue_dict[module].put(endval)
+        except KeyError:
+            continue
     for thread in output_threads:
         thread.join()
         
