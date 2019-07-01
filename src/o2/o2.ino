@@ -181,35 +181,39 @@ void handleSensor(int i){
   Cal out is a boolean: 1 if called by calibration and only prints cal status (does not set data)
 
 */
+char errstr[10] = "ERR", statstr[10] = "STS", calstr[10] = "CAL";
+
 int getVal(int sensor, char *output, unsigned int cal_out=0){
     int retval, data;
-    char o2_str[10], errstr[10] = "ERR", *errval, statstr[10] = "STS";
-    char calstr[10] = "CAL";
-       
+    char input[10], *errval;
+    
     errval = malloc(5);
     
     if(flag[sensor]>FLAG_NONE && flag[sensor]<FLAG_OFF ){ // Get calibration status
-	strcat(calstr, itoa(cal[sensor], errval, 10));
-	strcpy(output, calstr);
+	strcat(input, calstr);
+	strcat(input, itoa(cal[sensor], errval, 10));
+	strcpy(output, input);
 	retval = 1;
     }
     else if(status[sensor] == ON){    // Get O2 data
 	data = readReg(sensor, O2AVG_REG);
 	if(data < 0){                 // Failed to get data, output ERR
-	    strcat(errstr, itoa(data*-1, errval, 10));
-	    strcpy(output, errstr);	    
+	    strcat(input, errstr);
+	    strcat(input, itoa(data*-1, errval, 10));
+	    strcpy(output, input);	    
 	    retval = -1;
 	}
 	else{                         // Got data
-	    dtostrf(data, 4, 0, o2_str);
-	    strcpy(output, o2_str);
+	    dtostrf(data, 4, 0, input);
+	    strcpy(output, input);
 	    retval = 1;
 	}
     }
     else{
 	if(status[sensor] >= 0){     // Status is not ON - get status
-	    strcat(statstr, itoa(status[sensor], errval, 10));
-	    strcpy(output, statstr);
+	    strcat(input, statstr);
+	    strcat(input, itoa(status[sensor], errval, 10));
+	    strcpy(output, input);
 	    // Return failure only if sensor was not manually off
 	    if(flag[sensor] == FLAG_OFF)
 		retval = 1;
@@ -217,8 +221,9 @@ int getVal(int sensor, char *output, unsigned int cal_out=0){
 		retval = -2;
 	}
 	else{                       // Error status
-	    strcat(errstr, itoa(status[sensor]*-1, errval, 10));
-	    strcpy(output, errstr);
+	    strcat(input, errstr);
+	    strcat(input, itoa(status[sensor]*-1, errval, 10));
+	    strcpy(output, input);
 	    retval = -3;
 	}
     }
