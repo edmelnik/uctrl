@@ -308,7 +308,7 @@ void loop(){
     Serial.println(buffer);
     free(buffer);
     
-    if(k==CHK_DELAY && digitalRead(12)==LOW){
+    if(k==CHK_DELAY && Serial.available()){
 	handleCommands();
 	for(i=0; i< NUM_SENSORS; i++)
 	    if(flag[i] == FLAG_CAL || flag[i] == FLAG_OFF)
