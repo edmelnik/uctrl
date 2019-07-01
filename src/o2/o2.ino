@@ -181,7 +181,7 @@ void handleSensor(int i){
   Cal out is a boolean: 1 if called by calibration and only prints cal status (does not set data)
 
 */
-char errstr[10] = "ERR", statstr[10] = "STS", calstr[10] = "CAL";
+const static PROGMEM char errstr[] = "ERR", statstr[] = "STS", calstr[] = "CAL";
 
 int getVal(int sensor, char *output, unsigned int cal_out=0){
     int retval, data;
